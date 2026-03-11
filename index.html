@@ -733,7 +733,7 @@ async function selectCustomLang() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -977,11 +977,14 @@ function startAudioKeepalive() {
   } catch(e) {}
 }
 
-// 첫 번째 유저 인터랙션에서 바로 오디오 컨텍스트 초기화
-document.addEventListener('pointerdown', function initAudio() {
+// 첫 번째 유저 인터랙션에서 바로 오디오 컨텍스트 초기화 (iOS는 touchstart 필요)
+function initAudioOnce() {
   startAudioKeepalive();
-  document.removeEventListener('pointerdown', initAudio);
-}, { once: true });
+  document.removeEventListener('pointerdown', initAudioOnce);
+  document.removeEventListener('touchstart', initAudioOnce);
+}
+document.addEventListener('pointerdown', initAudioOnce, { once: true });
+document.addEventListener('touchstart', initAudioOnce, { once: true, passive: true });
 
 function switchSyl(i) {
   activeSyl = i;
@@ -1166,7 +1169,7 @@ async function translateWord(text) {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 100,
