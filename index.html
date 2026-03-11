@@ -831,8 +831,12 @@ function showOnboarding(lang) {
   `).join('');
   document.getElementById('onboardingStartBtn').textContent = data.start;
   const overlay = document.getElementById('onboardingOverlay');
-  overlay.scrollTop = 0;
   overlay.classList.add('visible');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      overlay.scrollTop = 0;
+    });
+  });
 }
 
 function closeOnboarding() {
