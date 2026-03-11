@@ -63,7 +63,7 @@
   .lang-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
   .lang-native { font-size: 0.68rem; color: var(--text-soft); }
 
-  .custom-lang-section { width: 100%; max-width: 400px; padding-bottom: 16px; }
+  .custom-lang-section { width: 100%; max-width: 400px; padding: 0 0 16px; box-sizing: border-box; }
   .custom-lang-divider {
     display: flex; align-items: center; gap: 10px; margin: 4px 0 14px;
   }
@@ -79,13 +79,14 @@
     margin-bottom: 10px; font-weight: 600;
   }
   .custom-lang-row {
-    display: flex; gap: 8px; align-items: center;
+    display: flex; gap: 8px; align-items: center; width: 100%;
   }
   .custom-lang-input {
-    flex: 1; padding: 12px 16px; border-radius: 14px;
+    flex: 1; min-width: 0; padding: 12px 16px; border-radius: 14px;
     border: 1.5px solid var(--divider); background: var(--surface);
     font-family: 'Noto Sans KR', sans-serif; font-size: 0.88rem;
     color: var(--text); outline: none; transition: border-color 0.15s;
+    box-sizing: border-box;
   }
   .custom-lang-input:focus { border-color: #C0504A; }
   .custom-lang-input::placeholder { color: var(--text-soft); }
