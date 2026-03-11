@@ -109,8 +109,8 @@
     background: var(--bg);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
     z-index: 998; display: none;
-    flex-direction: column; align-items: center; justify-content: center;
-    padding: 32px 24px; overflow-y: auto;
+    flex-direction: column; align-items: center; justify-content: flex-start;
+    padding: 32px 24px; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   #onboardingOverlay.visible { display: flex; }
   .onboarding-card {
@@ -485,7 +485,6 @@
 
   <!-- Translation bar -->
   <div class="translation-bar" id="translationBar">
-    <span class="translation-label" id="translationLabel"></span>
     <span class="translation-text" id="translationText"></span>
     <span class="translation-loading" id="translationLoading" style="display:none">✦</span>
     <button class="submit-btn" id="submitBtn" onclick="triggerTranslation()">Translate</button>
@@ -832,7 +831,6 @@ function applyLang(lang) {
   document.getElementById('langBadgeFlag').textContent = lang.flag;
   document.getElementById('langBadgeName').textContent = lang.name;
   document.getElementById('submitBtn').textContent = lang.translateBtn || 'Translate';
-  document.getElementById('translationLabel').textContent = TRANSLATION_LABELS[lang.code] || 'Translation';
   scheduleTranslation();
 }
 
@@ -1132,12 +1130,10 @@ const LANG_NAMES = {
 
 async function translateWord(text) {
   const L = currentLang || LANGS[0];
-  const label = document.getElementById('translationLabel');
+  const targetLang = LANG_NAMES[L.code] || 'English';
   const display = document.getElementById('translationText');
   const loading = document.getElementById('translationLoading');
-  const targetLang = LANG_NAMES[L.code] || 'English';
 
-  label.textContent = TRANSLATION_LABELS[L.code] || 'Translation';
   display.textContent = '';
   loading.style.display = 'inline';
 
@@ -1318,7 +1314,6 @@ function resetAll() {
   });
   document.getElementById('batchimResetBtn').classList.remove('active');
   document.getElementById('translationText').textContent = '';
-  document.getElementById('translationLabel').textContent = '';
   document.getElementById('translationLoading').style.display = 'none';
 }
 
