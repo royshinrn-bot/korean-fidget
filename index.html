@@ -836,6 +836,7 @@ function showOnboarding(lang) {
 function closeOnboarding() {
   document.getElementById('onboardingOverlay').classList.remove('visible');
   document.getElementById('appWrapper').style.display = 'block';
+  window.scrollTo(0, 0);
 }
 
 function selectLang(lang) {
@@ -843,6 +844,7 @@ function selectLang(lang) {
   document.getElementById('langOverlay').style.display = 'none';
   applyLang(lang);
   resetAll();
+  window.scrollTo(0, 0);
   showOnboarding(lang);
 }
 
@@ -865,6 +867,7 @@ function applyLang(lang) {
 function showLangPicker() {
   document.getElementById('langOverlay').style.display = 'flex';
   document.getElementById('appWrapper').style.display = 'none';
+  window.scrollTo(0, 0);
 }
 
 // ── Korean data ──
