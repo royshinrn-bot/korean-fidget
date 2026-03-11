@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Korean Fidget</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F2EBD9;
+    --surface: #EDE3CC;
+    --surface2: #E5D9C0;
+    --text: #2A1F0E;
+    --text-mid: #5C4A2A;
+    --text-soft: #8C7555;
+    --accent: #C0392B;
+    --divider: #C8B99A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    padding-bottom: 60px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  }
+
+  /* ── Language Overlay ── */
+  #langOverlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+    z-index: 999;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 48px 20px 48px; gap: 20px;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .overlay-logo {
+    font-family: 'Black Han Sans', sans-serif; font-size: 2.2rem;
+    background: linear-gradient(135deg, #C0392B 0%, #E67E22 50%, #2E86AB 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .overlay-title { font-size: 0.95rem; color: var(--text-mid); text-align: center; line-height: 2; font-weight: 700; }
+  .overlay-subtitle { font-size: 0.72rem; color: var(--text-soft); text-align: center; line-height: 1.8; margin-top: -8px; }
+  .lang-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; width: 100%; max-width: 400px; }
+  .lang-btn {
+    background: var(--surface); border: 1.5px solid var(--divider); border-radius: 14px;
+    padding: 14px 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+    transition: all 0.15s; font-family: 'Noto Sans KR', sans-serif;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .lang-btn:hover { background: var(--surface2); border-color: var(--text-soft); transform: translateY(-2px); box-shadow: 0 5px 14px rgba(0,0,0,0.1); }
+  .lang-btn:active { transform: scale(0.97); }
+  .lang-flag { font-size: 1.5rem; }
+  .lang-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+  .lang-native { font-size: 0.68rem; color: var(--text-soft); }
+
+  .custom-lang-section { width: 100%; max-width: 400px; padding: 0 0 16px; box-sizing: border-box; }
+  .custom-lang-divider {
+    display: flex; align-items: center; gap: 10px; margin: 4px 0 14px;
+  }
+  .custom-lang-divider::before, .custom-lang-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--divider);
+  }
+  .custom-lang-divider span {
+    font-size: 0.65rem; color: var(--text-soft); font-weight: 700;
+    letter-spacing: 1px; white-space: nowrap;
+  }
+  .custom-lang-label {
+    font-size: 0.7rem; color: var(--text-soft); text-align: center;
+    margin-bottom: 10px; font-weight: 600;
+  }
+  .custom-lang-row {
+    display: flex; gap: 8px; align-items: center; width: 100%;
+  }
+  .custom-lang-input {
+    flex: 1; min-width: 0; padding: 12px 16px; border-radius: 14px;
+    border: 1.5px solid var(--divider); background: var(--surface);
+    font-family: 'Noto Sans KR', sans-serif; font-size: 16px;
+    color: var(--text); outline: none; transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+  .custom-lang-input:focus { border-color: #C0504A; }
+  .custom-lang-input::placeholder { color: var(--text-soft); }
+  .custom-lang-btn {
+    width: 46px; height: 46px; border-radius: 14px; border: none;
+    background: #C0504A; color: #fff; font-size: 1.1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(192,80,74,0.3);
+  }
+  .custom-lang-btn:hover { background: #A8423C; transform: scale(1.05); }
+  .custom-lang-btn:active { transform: scale(0.95); }
+  .custom-lang-btn.loading { pointer-events: none; animation: spin 1s linear infinite; }
+  .custom-lang-error {
+    font-size: 0.72rem; color: #C0504A; text-align: center;
+    margin-top: 8px; min-height: 18px;
+  }
+  #onboardingOverlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+    z-index: 998; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 24px; overflow-y: auto;
+  }
+  #onboardingOverlay.visible { display: flex; }
+  .onboarding-card {
+    background: var(--surface); border: 1.5px solid var(--divider); border-radius: 24px;
+    padding: 28px 24px; width: 100%; max-width: 400px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    position: relative;
+  }
+  .onboarding-close {
+    position: absolute; top: 16px; right: 16px;
+    background: var(--surface2); border: 1.5px solid var(--divider); border-radius: 50%;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem; color: var(--text-mid);
+    transition: all 0.15s; line-height: 1;
+  }
+  .onboarding-close:hover { background: #e8d5b5; color: var(--text); }
+  .onboarding-logo {
+    font-family: 'Black Han Sans', sans-serif; font-size: 1.6rem;
+    background: linear-gradient(135deg, #C0392B 0%, #E67E22 50%, #2E86AB 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 20px;
+  }
+  .onboarding-items { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .onboarding-item { display: flex; gap: 14px; align-items: flex-start; }
+  .onboarding-num {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #C0392B, #E67E22);
+    color: #fff; font-size: 0.72rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .onboarding-text {
+    font-family: 'Noto Sans KR', sans-serif; font-size: 0.82rem;
+    color: var(--text); line-height: 1.65; font-weight: 500;
+  }
+  .onboarding-email {
+    color: #C0504A; font-weight: 700;
+  }
+  .onboarding-start-btn {
+    width: 100%; padding: 14px; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, #C0392B, #E67E22);
+    color: #fff; font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
+    letter-spacing: 1px; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(192,57,43,0.3);
+    transition: all 0.18s;
+  }
+  .onboarding-start-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(192,57,43,0.38); }
+  .onboarding-start-btn:active { transform: translateY(1px); }
+
+  header { text-align: center; padding: 24px 0 16px; }
+  .logo {
+    font-family: 'Black Han Sans', sans-serif; font-size: 2.2rem; letter-spacing: -1px;
+    background: linear-gradient(135deg, #C0392B 0%, #E67E22 50%, #2E86AB 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  /* ── Main App ── */
+  .app-wrapper { width: 100%; max-width: 480px; padding: 0 16px; display: none; }
+  .lang-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--divider); border-radius: 20px;
+    padding: 5px 12px; font-size: 0.7rem; color: var(--text-mid); cursor: pointer;
+    margin-top: 10px; transition: all 0.15s; font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+  }
+  .lang-badge:hover { background: var(--surface2); border-color: var(--text-soft); }
+
+  /* ── Syllable Tabs ── */
+  .syllable-tabs {
+    display: flex; gap: 8px; margin-bottom: 14px;
+  }
+  .syl-tab {
+    flex: 1; padding: 0; border: 2px solid var(--divider);
+    border-radius: 18px; background: var(--surface);
+    cursor: pointer; transition: all 0.18s; font-family: 'Noto Sans KR', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; overflow: hidden; min-height: 72px; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .syl-tab:hover { background: var(--surface2); }
+  .syl-tab.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.15), 0 2px 10px rgba(0,0,0,0.1);
+    background: #fff8f5;
+  }
+  .syl-tab-label {
+    font-size: 0.58rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-soft); padding-top: 8px;
+  }
+  .syl-tab.active .syl-tab-label { color: var(--accent); }
+  .syl-tab-char {
+    font-family: 'Black Han Sans', sans-serif; font-size: 2.4rem; line-height: 1;
+    color: var(--text-soft); padding-bottom: 8px;
+    transition: all 0.15s;
+  }
+  .syl-tab.active .syl-tab-char { color: var(--text); }
+  .syl-tab.has-content .syl-tab-char { color: var(--text); }
+  .syl-tab-plus { font-size: 1.4rem; color: var(--divider); padding-bottom: 8px; }
+
+  /* ── Display Box ── */
+  .display-box {
+    background: var(--surface); border: 1.5px solid var(--divider); border-radius: 24px;
+    padding: 22px 24px 18px; margin-bottom: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.55);
+  }
+  .display-main-row {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .word-display {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 110px; gap: 8px; flex: 1;
+  }
+  /* ── Display Actions (speaker + reset inside box) ── */
+  .display-actions {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding-left: 14px;
+  }
+  .display-speaker-btn {
+    width: 44px; height: 44px; border-radius: 14px; border: 1.5px solid rgba(210,80,80,0.25);
+    background: rgba(220,90,80,0.08); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s ease; flex-shrink: 0;
+    position: relative; overflow: hidden; color: #C0504A;
+  }
+  .display-speaker-btn:hover {
+    background: rgba(220,90,80,0.15); border-color: rgba(210,80,80,0.45);
+    transform: scale(1.06);
+  }
+  .display-speaker-btn:active { transform: scale(0.94); background: rgba(220,90,80,0.22); }
+  .display-speaker-btn.playing { animation: speakerPulse 0.4s ease-out; }
+  .display-reset-btn {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: rgba(0,0,0,0.04); border: 1.5px solid var(--divider); cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 700; font-size: 1rem;
+    color: var(--text-soft); transition: all 0.18s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .display-reset-btn:hover { background: rgba(0,0,0,0.08); color: var(--text); border-color: var(--text-soft); }
+  .display-reset-btn:active { transform: scale(0.94); }
+
+  /* ── Translation Bar ── */
+  .translation-bar {
+    background: var(--surface); border: 1.5px solid var(--divider); border-radius: 16px;
+    padding: 8px 8px 8px 16px; margin-bottom: 18px; min-height: 42px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .translation-label {
+    font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-soft); font-weight: 700; white-space: nowrap; flex-shrink: 0;
+  }
+  .translation-text {
+    font-family: 'Noto Sans KR', sans-serif; font-size: 0.92rem;
+    color: var(--text); font-weight: 800; flex: 1; min-width: 0;
+    word-break: break-word; overflow-wrap: break-word;
+  }
+  .translation-loading {
+    font-size: 1rem; color: #C0504A; animation: spin 1s linear infinite; flex-shrink: 0;
+  }
+  .submit-btn {
+    background: #C0504A; color: #fff; border: none; border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; padding: 8px 14px;
+    cursor: pointer; flex-shrink: 0; transition: all 0.18s ease;
+    box-shadow: 0 2px 8px rgba(192,80,74,0.25); margin-left: auto;
+  }
+  .submit-btn:hover { background: #A8423C; box-shadow: 0 4px 12px rgba(192,80,74,0.35); transform: translateY(-1px); }
+  .submit-btn:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(192,80,74,0.2); }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes speakerPulse {
+    0%  { transform: scale(1); }
+    50% { transform: scale(1.1) translateY(-2px); }
+    100%{ transform: scale(1); }
+  }
+  .speaker-icon { font-size: 1.2rem; z-index: 1; line-height: 1; }
+  .sound-waves { position:absolute; inset:0; border-radius:50%; pointer-events:none; }
+  .sound-waves.active::before, .sound-waves.active::after {
+    content:''; position:absolute; inset:-4px; border-radius:50%;
+    border:2px solid rgba(192,57,43,0.45); animation:ripple 0.6s ease-out forwards;
+  }
+  .sound-waves.active::after { inset:-12px; animation-delay:0.1s; border-color:rgba(192,57,43,0.2); }
+  @keyframes ripple { from{opacity:1;transform:scale(1);} to{opacity:0;transform:scale(1.5);} }
+  .char-slot {
+    font-family: 'Black Han Sans', sans-serif; font-size: 5.5rem; line-height: 1;
+    color: var(--divider); transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08));
+    min-width: 80px; text-align: center;
+  }
+  .char-slot.filled { color: var(--text-soft); }
+  .char-slot.active-slot { color: var(--text); filter: drop-shadow(0 2px 10px rgba(192,57,43,0.2)); }
+  .char-slot.pop { animation: popAnim 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popAnim {
+    0%  { transform: scale(1); }
+    50% { transform: scale(1.25) rotate(-2deg); }
+    100%{ transform: scale(1); }
+  }
+  .word-dot {
+    font-family: 'Black Han Sans', sans-serif; font-size: 3rem;
+    color: var(--divider); line-height: 1; align-self: center; margin: 0 2px;
+  }
+
+  .parts-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; margin-top: 10px; min-height: 28px;
+  }
+  .part-chip {
+    font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
+    padding: 3px 9px; border-radius: 7px;
+    background: var(--bg); border: 1.5px solid var(--divider);
+    opacity: 0.5; color: var(--text);
+  }
+  .part-chip.active { opacity: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .part-chip-sep { color: var(--divider); font-size: 0.8rem; padding: 0 2px; }
+
+  /* ── Section Labels ── */
+  .section-label {
+    font-size: 0.68rem; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--text-mid); font-weight: 700; margin-bottom: 10px; padding-left: 2px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .optional-tag {
+    font-size: 0.6rem; background: var(--surface2); border: 1px solid var(--divider);
+    border-radius: 6px; padding: 2px 8px; color: var(--text-mid); font-weight: 600;
+    letter-spacing: 0.3px; text-transform: none; white-space: nowrap;
+  }
+
+  .fidget-section { margin-bottom: 16px; }
+  .btn-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* ── Fidget Buttons ── */
+  .fidget-btn {
+    position: relative; border: none; border-radius: 14px; cursor: pointer;
+    font-family: 'Black Han Sans', sans-serif; font-size: 1.65rem;
+    width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s cubic-bezier(0.34,1.56,0.64,1); transform-origin: center bottom;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.3);
+    font-weight: 900; user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  .fidget-btn::after {
+    content:''; position:absolute; top:0; left:0; right:0; height:40%;
+    border-radius:14px 14px 0 0; background:rgba(255,255,255,0.28); pointer-events:none;
+  }
+  .fidget-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 7px 0 rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.35); }
+  .fidget-btn:active, .fidget-btn.pressed { transform: translateY(3px) scale(0.95); box-shadow: 0 1px 0 rgba(0,0,0,0.22); }
+  .fidget-btn.selected {
+    transform: translateY(2px) scale(0.97);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.22), 0 0 0 3px rgba(0,0,0,0.3);
+    outline: 2.5px solid rgba(255,255,255,0.8); outline-offset: 1px;
+  }
+  .fidget-btn .romanized {
+    position:absolute; bottom:3px; right:5px;
+    font-family:'Noto Sans KR',sans-serif; font-size:0.45rem;
+    font-weight:700; opacity:0.7; letter-spacing:0;
+  }
+  .fidget-btn.vowel { width: 50px; font-size: 1.55rem; }
+  .fidget-btn.batchim { width: 50px; font-size: 1.45rem; border-radius: 10px; }
+
+  .pantone-badge {
+    position:absolute; top:-6px; left:-6px; font-size:0.3rem;
+    background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.85);
+    padding:1px 3px; border-radius:3px; display:none;
+  }
+  .fidget-btn:hover .pantone-badge { display:block; }
+
+  .divider { height: 1px; background: var(--divider); margin: 14px 0; }
+
+  /* ── Batchim header row ── */
+  .batchim-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .batchim-reset-btn {
+    background: var(--surface2); border: 1.5px solid var(--divider);
+    border-radius: 8px; color: var(--text-mid); font-size: 0.75rem;
+    padding: 4px 10px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700; transition: all 0.15s; box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    opacity: 0.35; pointer-events: none;
+  }
+  .batchim-reset-btn.active { opacity: 1; pointer-events: auto; }
+  .batchim-reset-btn.active:hover { background: #e8d5b5; border-color: var(--text-soft); color: var(--text); }
+  .batchim-reset-btn.active:active { transform: scale(0.95); }
+
+  .instruction { text-align:center; font-size:0.7rem; color:var(--text-soft); margin-top:10px; line-height:1.8; }
+
+  .toast {
+    position:fixed; bottom:80px; left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--text); color:var(--bg); font-size:0.75rem;
+    padding:10px 20px; border-radius:20px; opacity:0; transition:all 0.3s;
+    pointer-events:none; z-index:100; white-space:nowrap;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ── Language Overlay ── -->
+<div id="langOverlay">
+  <div class="overlay-logo">Korean Fidget</div>
+  <div class="overlay-title">언어를 선택해 주세요<br>Choose your language</div>
+  <div class="overlay-subtitle">선택한 언어로 앱이 안내됩니다<br>The app will guide you in your chosen language</div>
+  <div class="lang-grid" id="langGrid"></div>
+
+  <div class="custom-lang-section">
+    <div class="custom-lang-divider">
+      <span>또는 / or</span>
+    </div>
+    <div class="custom-lang-label">직접 언어를 입력해 주세요 · Type your language</div>
+    <div class="custom-lang-row">
+      <input type="text" id="customLangInput" class="custom-lang-input"
+        placeholder="e.g. Swahili, Türkçe, Polski..." onkeydown="if(event.key==='Enter') selectCustomLang()" />
+      <button class="custom-lang-btn" onclick="selectCustomLang()" id="customLangBtn">→</button>
+    </div>
+    <div class="custom-lang-error" id="customLangError"></div>
+  </div>
+</div>
+
+<!-- ── Onboarding Overlay ── -->
+<div id="onboardingOverlay">
+  <div class="onboarding-card">
+    <button class="onboarding-close" onclick="closeOnboarding()">✕</button>
+    <div class="onboarding-logo">Korean Fidget</div>
+    <div class="onboarding-items" id="onboardingItems"></div>
+    <button class="onboarding-start-btn" id="onboardingStartBtn" onclick="closeOnboarding()"></button>
+  </div>
+</div>
+
+<!-- ── Main App ── -->
+<div class="app-wrapper" id="appWrapper">
+  <header>
+    <div class="logo">Korean Fidget</div>
+    <div class="tagline">자음 · 모음 · 받침</div>
+    <button class="lang-badge" onclick="showLangPicker()">
+      <span id="langBadgeFlag"></span>
+      <span id="langBadgeName"></span>
+      <span style="opacity:0.45;font-size:0.6rem">▾</span>
+    </button>
+    <div class="instruction" id="instruction"></div>
+  </header>
+
+  <!-- Syllable selector tabs -->
+  <div class="syllable-tabs">
+    <button class="syl-tab active" id="tab0" onclick="switchSyl(0)">
+      <span class="syl-tab-label" id="tabLabel0">1번째 글자</span>
+      <span class="syl-tab-char" id="tabChar0">?</span>
+    </button>
+    <button class="syl-tab" id="tab1" onclick="switchSyl(1)">
+      <span class="syl-tab-label" id="tabLabel1">2번째 글자</span>
+      <span class="syl-tab-char" id="tabChar1">+</span>
+    </button>
+  </div>
+
+  <!-- Word display -->
+  <div class="display-box">
+    <div class="display-main-row">
+      <div class="word-display">
+        <div class="char-slot" id="slot0">?</div>
+        <div class="word-dot">·</div>
+        <div class="char-slot" id="slot1">?</div>
+      </div>
+      <div class="display-actions">
+        <button class="display-speaker-btn" id="speakerBtn" onclick="speak()">
+          <div class="sound-waves" id="soundWaves"></div>
+          <span class="speaker-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+          </span>
+        </button>
+        <button class="display-reset-btn" id="resetBtn" onclick="resetAll()">↺</button>
+      </div>
+    </div>
+    <div class="parts-row" id="partsRow"></div>
+  </div>
+
+  <!-- Translation bar -->
+  <div class="translation-bar" id="translationBar">
+    <span class="translation-label" id="translationLabel"></span>
+    <span class="translation-text" id="translationText"></span>
+    <span class="translation-loading" id="translationLoading" style="display:none">✦</span>
+    <button class="submit-btn" id="submitBtn" onclick="triggerTranslation()">Translate</button>
+  </div>
+
+  <!-- Consonants -->
+  <div class="fidget-section">
+    <div class="section-label" id="labelConsonant"></div>
+    <div class="btn-grid" id="consonantGrid"></div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Vowels -->
+  <div class="fidget-section">
+    <div class="section-label" id="labelVowel"></div>
+    <div class="btn-grid" id="vowelGrid"></div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Batchim -->
+  <div class="fidget-section">
+    <div class="batchim-header">
+      <div class="section-label" id="labelBatchim" style="margin-bottom:0"></div>
+      <button class="batchim-reset-btn" id="batchimResetBtn" onclick="resetBatchim()">↺</button>
+    </div>
+    <div class="btn-grid" id="batchimGrid"></div>
+  </div>
+
+
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Languages ──
+const LANGS = [
+  { code:'en', flag:'🇺🇸', name:'English', native:'English',
+    tab1:'1st syllable', tab2:'2nd syllable',
+    consonant:'자음 · Consonants', vowel:'모음 · Vowels',
+    batchim:'받침 · Final Consonant', optional:'선택 / Optional',
+    instruction:'Select syllable tab → consonant → vowel → batchim (optional) · 🔊 to hear',
+    reset:'↺ Reset', translateBtn:'Translate',
+    toastNeed:'Please build at least one syllable first!',
+    toastEmpty:'Nothing to pronounce', toastFail:'Audio playback failed' },
+  { code:'zh', flag:'🇨🇳', name:'中文', native:'简体中文',
+    tab1:'第1个字', tab2:'第2个字',
+    consonant:'자음 · 辅音', vowel:'모음 · 元音',
+    batchim:'받침 · 韵尾', optional:'선택 / 可选',
+    instruction:'选择音节标签 → 辅音 → 元音 → 韵尾（可选）· 🔊 收听',
+    reset:'↺ 重置', translateBtn:'翻译',
+    toastNeed:'请先组合至少一个音节！',
+    toastEmpty:'没有可发音的内容', toastFail:'音频播放失败' },
+  { code:'ja', flag:'🇯🇵', name:'日本語', native:'日本語',
+    tab1:'1文字目', tab2:'2文字目',
+    consonant:'자음 · 子音', vowel:'모음 · 母音',
+    batchim:'받침 · 終声', optional:'선택 / 任意',
+    instruction:'タブ選択 → 子音 → 母音 → 終声（任意）· 🔊 で発音',
+    reset:'↺ リセット', translateBtn:'翻訳',
+    toastNeed:'最低1文字を作ってください！',
+    toastEmpty:'発音する文字がありません', toastFail:'音声再生に失敗しました' },
+  { code:'es', flag:'🇪🇸', name:'Español', native:'Español',
+    tab1:'1ª sílaba', tab2:'2ª sílaba',
+    consonant:'자음 · Consonantes', vowel:'모음 · Vocales',
+    batchim:'받침 · Consonante final', optional:'선택 / Opcional',
+    instruction:'Selecciona sílaba → consonante → vocal → batchim (opcional) · 🔊',
+    reset:'↺ Reiniciar', translateBtn:'Traducir',
+    toastNeed:'¡Construye al menos una sílaba!',
+    toastEmpty:'Nada que pronunciar', toastFail:'Error de reproducción' },
+  { code:'fr', flag:'🇫🇷', name:'Français', native:'Français',
+    tab1:'1ère syllabe', tab2:'2ème syllabe',
+    consonant:'자음 · Consonnes', vowel:'모음 · Voyelles',
+    batchim:'받침 · Consonne finale', optional:'선택 / Optionnel',
+    instruction:'Choisis syllabe → consonne → voyelle → batchim (optionnel) · 🔊',
+    reset:'↺ Réinitialiser', translateBtn:'Traduire',
+    toastNeed:'Construis au moins une syllabe !',
+    toastEmpty:'Rien à prononcer', toastFail:'Échec de la lecture audio' },
+  { code:'ru', flag:'🇷🇺', name:'Русский', native:'Русский',
+    tab1:'1-й слог', tab2:'2-й слог',
+    consonant:'자음 · Согласные', vowel:'모음 · Гласные',
+    batchim:'받침 · Конечный согласный', optional:'선택 / Необязательно',
+    instruction:'Выбери слог → согласная → гласная → батчим (необяз.) · 🔊',
+    reset:'↺ Сбросить', translateBtn:'Перевести',
+    toastNeed:'Сначала составьте хотя бы один слог!',
+    toastEmpty:'Нечего произносить', toastFail:'Ошибка воспроизведения' },
+  { code:'pt', flag:'🇧🇷', name:'Português', native:'Português',
+    tab1:'1ª sílaba', tab2:'2ª sílaba',
+    consonant:'자음 · Consoantes', vowel:'모음 · Vogais',
+    batchim:'받침 · Consoante final', optional:'선택 / Opcional',
+    instruction:'Escolha sílaba → consoante → vogal → batchim (opcional) · 🔊',
+    reset:'↺ Resetar', translateBtn:'Traduzir',
+    toastNeed:'Monte pelo menos uma sílaba primeiro!',
+    toastEmpty:'Nada para pronunciar', toastFail:'Falha na reprodução de áudio' },
+  { code:'ar', flag:'🇸🇦', name:'العربية', native:'العربية',
+    tab1:'المقطع ١', tab2:'المقطع ٢',
+    consonant:'자음 · الحروف الساكنة', vowel:'모음 · الحروف المتحركة',
+    batchim:'받침 · الحرف الأخير', optional:'선택 / اختياري',
+    instruction:'اختر مقطعاً ← حرف ساكن ← حرف متحرك ← باتشيم (اختياري) · 🔊',
+    reset:'↺ إعادة', translateBtn:'ترجمة',
+    toastNeed:'يرجى بناء مقطع واحد على الأقل!',
+    toastEmpty:'لا يوجد شيء للنطق', toastFail:'فشل تشغيل الصوت' },
+  { code:'hi', flag:'🇮🇳', name:'Hindi', native:'हिन्दी',
+    tab1:'पहला अक्षर', tab2:'दूसरा अक्षर',
+    consonant:'자음 · व्यंजन', vowel:'모음 · स्वर',
+    batchim:'받침 · अंतिम व्यंजन', optional:'선택 / वैकल्पिक',
+    instruction:'सिलेबल टैब → व्यंजन → स्वर → बचिम (वैकल्पिक) · 🔊',
+    reset:'↺ रीसेट', translateBtn:'अनुवाद करें',
+    toastNeed:'कृपया पहले कम से कम एक अक्षर बनाएं!',
+    toastEmpty:'उच्चारण के लिए कुछ नहीं', toastFail:'ऑडियो चलाने में विफल' },
+  { code:'it', flag:'🇮🇹', name:'Italiano', native:'Italiano',
+    tab1:'1ª sillaba', tab2:'2ª sillaba',
+    consonant:'자음 · Consonanti', vowel:'모음 · Vocali',
+    batchim:'받침 · Consonante finale', optional:'선택 / Opzionale',
+    instruction:'Scegli sillaba → consonante → vocale → batchim (opzionale) · 🔊',
+    reset:'↺ Reimposta', translateBtn:'Traduci',
+    toastNeed:'Costruisci almeno una sillaba!',
+    toastEmpty:'Niente da pronunciare', toastFail:'Riproduzione audio fallita' },
+];
+
+let currentLang = null;
+
+function buildLangPicker() {
+  const grid = document.getElementById('langGrid');
+  LANGS.forEach(lang => {
+    const btn = document.createElement('button');
+    btn.className = 'lang-btn';
+    btn.innerHTML = `<span class="lang-flag">${lang.flag}</span><div><div class="lang-name">${lang.name}</div><div class="lang-native">${lang.native}</div></div>`;
+    btn.onclick = () => selectLang(lang);
+    grid.appendChild(btn);
+  });
+}
+
+const ONBOARDING = {
+  en: {
+    start: 'Start Learning →',
+    items: [
+      'This app was created to help you quickly understand my Korean language study book. <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ View the book (Amazon.com)</a>',
+      'Two-syllable words are quite common in Korean. For users with no prior knowledge of Korean, this app will help you easily learn how Korean is combined and how sounds are made.',
+      'You can assemble words just by pressing buttons on screen — no need to install a Korean keyboard on your phone or computer.',
+      'Longer and more complex sentences will be released as an upgraded version on the App Store / Google Play Store.',
+      'Any feedback is greatly appreciated: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  zh: {
+    start: '开始学习 →',
+    items: [
+      '这款应用是为了帮助您快速理解我的韩语学习书籍而制作的。<a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ 查看书籍 (Amazon.com)</a>',
+      '双音节单词在韩语中非常常见。对于没有任何韩语基础的用户，本应用将帮助您轻松了解韩语的组合方式及发音规律。',
+      '只需点击屏幕上的按钮即可组合单词，无需在手机或电脑上安装韩语键盘。',
+      '更长、更复杂的句子将作为升级版本在 App Store / Google Play 商店发布。',
+      '欢迎任何反馈意见：<a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  ja: {
+    start: '学習を始める →',
+    items: [
+      'このアプリは、私の韓国語学習書籍を素早く理解するために作られました。<a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ 書籍を見る (Amazon.com)</a>',
+      '2音節の単語は韓国語でよく使われます。韓国語が初めての方でも、韓国語の組み合わせ方や音の作り方を楽しく学べます。',
+      '画面上のボタンを押すだけで単語を組み立てられます。スマホやPCに韓国語キーボードをインストールする必要はありません。',
+      'より長く複雑な文章は、App Store / Google Play ストアでアップグレード版として提供予定です。',
+      'どんなフィードバックも大歓迎です：<a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  es: {
+    start: 'Comenzar →',
+    items: [
+      'Esta aplicación fue creada para ayudarte a entender rápidamente mi libro de estudio de coreano. <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ Ver el libro (Amazon.com)</a>',
+      'Las palabras de dos sílabas son bastante comunes en coreano. Para usuarios sin conocimiento previo del idioma, esta app te ayudará a aprender fácilmente cómo se combina el coreano y cómo se forman los sonidos.',
+      'Puedes armar palabras simplemente presionando botones en pantalla, sin necesidad de instalar un teclado coreano en tu teléfono o computadora.',
+      'Frases más largas y complejas se lanzarán como versión actualizada en la App Store / Google Play.',
+      'Cualquier comentario es muy bienvenido: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  fr: {
+    start: 'Commencer →',
+    items: [
+      'Cette application a été créée pour vous aider à comprendre rapidement mon livre d\'apprentissage du coréen. <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ Voir le livre (Amazon.com)</a>',
+      'Les mots de deux syllabes sont très courants en coréen. Pour les utilisateurs sans connaissance préalable du coréen, cette application vous aidera à apprendre facilement comment le coréen se combine et crée des sons.',
+      'Vous pouvez assembler des mots en appuyant simplement sur des boutons à l\'écran, sans installer de clavier coréen sur votre téléphone ou ordinateur.',
+      'Des phrases plus longues et complexes seront disponibles en version améliorée sur l\'App Store / Google Play.',
+      'Tout retour est le bienvenu : <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  ru: {
+    start: 'Начать обучение →',
+    items: [
+      'Это приложение создано, чтобы помочь вам быстро освоить мою книгу по изучению корейского языка. <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ Посмотреть книгу (Amazon.com)</a>',
+      'Двусложные слова очень распространены в корейском языке. Для пользователей без каких-либо предварительных знаний корейского это приложение поможет легко научиться, как сочетаются звуки и строятся слова.',
+      'Вы можете составлять слова, просто нажимая кнопки на экране — без необходимости устанавливать корейскую клавиатуру на телефон или компьютер.',
+      'Более длинные и сложные предложения будут выпущены в обновлённой версии в App Store / Google Play Store.',
+      'Любые отзывы очень приветствуются: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  pt: {
+    start: 'Começar a aprender →',
+    items: [
+      'Este app foi criado para te ajudar a entender rapidamente meu livro de estudo de coreano. <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ Ver o livro (Amazon.com)</a>',
+      'Palavras de duas sílabas são super comuns em coreano. Se você nunca estudou coreano antes, este app vai te ajudar a entender como os sons e sílabas se encaixam de um jeito bem simples.',
+      'Você monta as palavras só clicando nos botões da tela — sem precisar instalar teclado coreano no celular ou no computador.',
+      'Frases mais longas e complexas serão lançadas em uma versão atualizada na App Store / Google Play.',
+      'Qualquer feedback é muito bem-vindo: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  ar: {
+    start: 'ابدأ التعلم ←',
+    items: [
+      'تم إنشاء هذا التطبيق لمساعدتك على فهم كتابي لتعلم اللغة الكورية بسرعة. <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">← عرض الكتاب (Amazon.com)</a>',
+      'الكلمات المكونة من مقطعين شائعة جداً في اللغة الكورية. للمستخدمين الذين ليس لديهم أي معرفة مسبقة بالكورية، سيساعدك هذا التطبيق على تعلم كيفية تركيب الكورية وإنتاج الأصوات بسهولة.',
+      'يمكنك تركيب الكلمات بمجرد الضغط على الأزرار على الشاشة — دون الحاجة إلى تثبيت لوحة مفاتيح كورية على هاتفك أو جهاز الكمبيوتر.',
+      'ستصدر الجمل الأطول والأكثر تعقيداً كإصدار محدّث على App Store / Google Play Store.',
+      'نرحّب بأي ملاحظات أو اقتراحات: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  hi: {
+    start: 'सीखना शुरू करें →',
+    items: [
+      'यह ऐप मेरी कोरियाई भाषा की किताब को आसानी से समझने में आपकी मदद करने के लिए बनाया गया है। <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ पुस्तक देखें (Amazon.com)</a>',
+      'कोरियाई में दो अक्षरों वाले शब्द बहुत आम हैं। अगर आपने पहले कभी कोरियाई नहीं सीखी, तो यह ऐप आपको आसान तरीके से सिखाएगा कि कोरियाई अक्षर कैसे जुड़ते हैं और उनकी आवाज़ें कैसे बनती हैं।',
+      'बस स्क्रीन पर बटन दबाइए और शब्द बनाइए — फोन या कंप्यूटर पर कोरियाई कीबोर्ड लगाने की कोई जरूरत नहीं।',
+      'लंबे और मुश्किल वाक्य जल्द ही App Store / Google Play पर अपडेटेड वर्ज़न में आएंगे।',
+      'कोई भी सुझाव हो तो ज़रूर बताएं: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  },
+  it: {
+    start: 'Inizia a imparare →',
+    items: [
+      'Questa app è stata creata per aiutarti a capire più facilmente il mio libro per imparare il coreano. <a href="https://a.co/d/06yqaVEa" target="_blank" class="onboarding-email">→ Vedi il libro (Amazon.com)</a>',
+      'Le parole di due sillabe sono comunissime in coreano. Anche se non hai mai studiato il coreano, questa app ti aiuterà a capire come si costruiscono le sillabe e come funzionano i suoni.',
+      'Puoi comporre le parole semplicemente premendo i pulsanti sullo schermo — niente tastiera coreana da installare!',
+      'Frasi più lunghe e complesse arriveranno presto come versione aggiornata su App Store / Google Play.',
+      'Qualsiasi feedback è molto gradito: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>'
+    ]
+  }
+};
+
+async function selectCustomLang() {
+  const input = document.getElementById('customLangInput');
+  const btn = document.getElementById('customLangBtn');
+  const error = document.getElementById('customLangError');
+  const langName = input.value.trim();
+
+  if (!langName) return;
+
+  error.textContent = '';
+  btn.textContent = '✦';
+  btn.classList.add('loading');
+
+  try {
+    const res = await fetch('/api/generate-lang', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ langName })
+    });
+
+    const data = await res.json();
+    if (data.error) {
+      error.textContent = data.error;
+      return;
+    }
+    const parsed = data.result;
+
+    if (!parsed.valid) {
+      error.textContent = `"${langName}" 을 인식할 수 없어요. Try again!`;
+      return;
+    }
+
+    const customLang = {
+      code: 'custom_' + langName.toLowerCase().replace(/\s+/g, '_'),
+      flag: '🌐',
+      name: parsed.displayName,
+      native: parsed.displayName,
+      tab1: parsed.tab1,
+      tab2: parsed.tab2,
+      consonant: parsed.consonant,
+      vowel: parsed.vowel,
+      batchim: parsed.batchim,
+      optional: parsed.optional,
+      instruction: parsed.instruction,
+      reset: '↺',
+      toastNeed: parsed.toastNeed,
+      toastEmpty: parsed.toastEmpty,
+      toastFail: parsed.toastFail,
+      translateBtn: parsed.translationLabel,
+    };
+
+    // Store custom onboarding
+    ONBOARDING[customLang.code] = {
+      start: parsed.onboardingStart,
+      items: parsed.onboardingItems
+    };
+
+    // Store custom translation label
+    TRANSLATION_LABELS[customLang.code] = parsed.translationLabel;
+    LANG_NAMES[customLang.code] = langName;
+
+    input.value = '';
+    selectLang(customLang);
+
+  } catch(e) {
+    error.textContent = 'Something went wrong. Please try again.';
+  } finally {
+    btn.textContent = '→';
+    btn.classList.remove('loading');
+  }
+}
+
+function showOnboarding(lang) {
+  const data = ONBOARDING[lang.code] || ONBOARDING.en;
+  const itemsEl = document.getElementById('onboardingItems');
+  itemsEl.innerHTML = data.items.map((text, i) => `
+    <div class="onboarding-item">
+      <div class="onboarding-num">${i + 1}</div>
+      <div class="onboarding-text">${text}</div>
+    </div>
+  `).join('');
+  document.getElementById('onboardingStartBtn').textContent = data.start;
+  const overlay = document.getElementById('onboardingOverlay');
+  overlay.classList.add('visible');
+  setTimeout(() => { overlay.scrollTop = 0; }, 300);
+}
+
+function closeOnboarding() {
+  document.getElementById('onboardingOverlay').classList.remove('visible');
+  document.getElementById('appWrapper').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function selectLang(lang) {
+  currentLang = lang;
+  document.getElementById('langOverlay').style.display = 'none';
+  applyLang(lang);
+  resetAll();
+  window.scrollTo(0, 0);
+  showOnboarding(lang);
+}
+
+function applyLang(lang) {
+  document.getElementById('tabLabel0').textContent = lang.tab1;
+  document.getElementById('tabLabel1').textContent = lang.tab2;
+  document.getElementById('labelConsonant').textContent = lang.consonant;
+  document.getElementById('labelVowel').textContent = lang.vowel;
+  document.getElementById('labelBatchim').innerHTML =
+    `${lang.batchim} <span class="optional-tag">${lang.optional}</span>`;
+  document.getElementById('instruction').textContent = lang.instruction;
+  document.getElementById('resetBtn').textContent = '↺';
+  document.getElementById('langBadgeFlag').textContent = lang.flag;
+  document.getElementById('langBadgeName').textContent = lang.name;
+  document.getElementById('submitBtn').textContent = lang.translateBtn || 'Translate';
+  document.getElementById('translationLabel').textContent = TRANSLATION_LABELS[lang.code] || 'Translation';
+  scheduleTranslation();
+}
+
+function showLangPicker() {
+  document.getElementById('langOverlay').style.display = 'flex';
+  document.getElementById('appWrapper').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+// ── Korean data ──
+const consonants = [
+  { char:'ㄱ', roman:'g/k', color:'#FF4F1F', pantone:'179 C',  initial:0,  doubled:1  },
+  { char:'ㄴ', roman:'n',   color:'#E08900', pantone:'137 C',  initial:2,  doubled:null },
+  { char:'ㄷ', roman:'d/t', color:'#C4A800', pantone:'109 C',  initial:3,  doubled:4  },
+  { char:'ㄹ', roman:'r/l', color:'#4A9020', pantone:'360 C',  initial:5,  doubled:null },
+  { char:'ㅁ', roman:'m',   color:'#009880', pantone:'326 C',  initial:6,  doubled:null },
+  { char:'ㅂ', roman:'b/p', color:'#007DBF', pantone:'299 C',  initial:7,  doubled:8  },
+  { char:'ㅅ', roman:'s',   color:'#1C4D9E', pantone:'293 C',  initial:9,  doubled:10 },
+  { char:'ㅇ', roman:'ng',  color:'#6344A0', pantone:'267 C',  initial:11, doubled:null },
+  { char:'ㅈ', roman:'j',   color:'#B0005A', pantone:'213 C',  initial:12, doubled:13 },
+  { char:'ㅊ', roman:'ch',  color:'#CC2030', pantone:'186 C',  initial:14, doubled:null },
+  { char:'ㅋ', roman:'k',   color:'#E05010', pantone:'021 C',  initial:15, doubled:null },
+  { char:'ㅌ', roman:'t',   color:'#008090', pantone:'3262 C', initial:16, doubled:null },
+  { char:'ㅍ', roman:'p',   color:'#558800', pantone:'382 C',  initial:17, doubled:null },
+  { char:'ㅎ', roman:'h',   color:'#B8005A', pantone:'Rho.',   initial:18, doubled:null },
+];
+// doubled consonant chars for display
+const DOUBLED_CHAR = { 0:'ㄲ', 2:'ㄸ', 5:'ㅃ', 6:'ㅆ', 8:'ㅉ' }; // keyed by consonant index
+
+const vowels = [
+  { char:'ㅏ', roman:'a',   color:'#C07800', pantone:'137 C',  idx:0  },
+  { char:'ㅑ', roman:'ya',  color:'#A07000', pantone:'128 C',  idx:2  },
+  { char:'ㅓ', roman:'eo',  color:'#007A65', pantone:'3262 C', idx:4  },
+  { char:'ㅕ', roman:'yeo', color:'#006E5E', pantone:'326 C',  idx:6  },
+  { char:'ㅗ', roman:'o',   color:'#B02820', pantone:'186 C',  idx:8  },
+  { char:'ㅛ', roman:'yo',  color:'#B84030', pantone:'1788 C', idx:10 },
+  { char:'ㅜ', roman:'u',   color:'#115899', pantone:'285 C',  idx:13 },
+  { char:'ㅠ', roman:'yu',  color:'#4A3090', pantone:'267 C',  idx:15 },
+  { char:'ㅡ', roman:'eu',  color:'#3A6E18', pantone:'362 C',  idx:18 },
+  { char:'ㅣ', roman:'i',   color:'#A02018', pantone:'178 C',  idx:20 },
+  { char:'ㅐ', roman:'ae',  color:'#A06018', pantone:'716 C',  idx:1  },
+  { char:'ㅔ', roman:'e',   color:'#887010', pantone:'127 C',  idx:5  },
+];
+// compound vowel combos: [firstVowelIndex, secondVowelIndex] → jung idx
+// vowel indices in the array above: ㅏ=0,ㅑ=1,ㅓ=2,ㅕ=3,ㅗ=4,ㅛ=5,ㅜ=6,ㅠ=7,ㅡ=8,ㅣ=9,ㅐ=10,ㅔ=11
+const COMPOUND_VOWEL = {
+  '4,0':  { char:'ㅘ', roman:'wa',  idx:9  },  // ㅗ+ㅏ→ㅘ
+  '4,10': { char:'ㅙ', roman:'wae', idx:10 },  // ㅗ+ㅐ→ㅙ
+  '4,9':  { char:'ㅚ', roman:'oe',  idx:11 },  // ㅗ+ㅣ→ㅚ
+  '6,2':  { char:'ㅝ', roman:'wo',  idx:14 },  // ㅜ+ㅓ→ㅝ
+  '6,11': { char:'ㅞ', roman:'we',  idx:15 },  // ㅜ+ㅔ→ㅞ
+  '6,9':  { char:'ㅟ', roman:'wi',  idx:16 },  // ㅜ+ㅣ→ㅟ
+  '8,9':  { char:'ㅢ', roman:'ui',  idx:19 },  // ㅡ+ㅣ→ㅢ
+  '1,9':  { char:'ㅒ', roman:'yae', idx:3  },  // ㅑ+ㅣ→ㅒ (approx)
+  '3,9':  { char:'ㅖ', roman:'ye',  idx:7  },  // ㅕ+ㅣ→ㅖ (approx)
+};
+
+const batchims = [
+  { char:'ㄱ', roman:'k',  color:'#FF4F1F', idx:1  },
+  { char:'ㄴ', roman:'n',  color:'#E08900', idx:4  },
+  { char:'ㄷ', roman:'t',  color:'#C4A800', idx:7  },
+  { char:'ㄹ', roman:'l',  color:'#4A9020', idx:8  },
+  { char:'ㅁ', roman:'m',  color:'#009880', idx:16 },
+  { char:'ㅂ', roman:'p',  color:'#007DBF', idx:17 },
+  { char:'ㅅ', roman:'s',  color:'#1C4D9E', idx:19 },
+  { char:'ㅇ', roman:'ng', color:'#6344A0', idx:21 },
+  { char:'ㅈ', roman:'j',  color:'#B0005A', idx:22 },
+  { char:'ㅊ', roman:'ch', color:'#CC2030', idx:23 },
+  { char:'ㅋ', roman:'k',  color:'#E05010', idx:24 },
+  { char:'ㅌ', roman:'t',  color:'#008090', idx:25 },
+  { char:'ㅍ', roman:'p',  color:'#558800', idx:26 },
+  { char:'ㅎ', roman:'h',  color:'#B8005A', idx:27 },
+];
+// double batchim combos: 'batchimIdxA,batchimIdxB' → jong idx
+// batchim array indices: ㄱ=0,ㄴ=1,ㄷ=2,ㄹ=3,ㅁ=4,ㅂ=5,ㅅ=6,ㅇ=7,ㅈ=8,ㅊ=9,ㅋ=10,ㅌ=11,ㅍ=12,ㅎ=13
+const DOUBLE_BATCHIM = {
+  '0,6':  { char:'ㄳ', idx:2  },  // ㄱ+ㅅ
+  '1,8':  { char:'ㄵ', idx:5  },  // ㄴ+ㅈ
+  '1,13': { char:'ㄶ', idx:6  },  // ㄴ+ㅎ
+  '3,0':  { char:'ㄺ', idx:9  },  // ㄹ+ㄱ
+  '3,4':  { char:'ㄻ', idx:10 },  // ㄹ+ㅁ
+  '3,5':  { char:'ㄼ', idx:11 },  // ㄹ+ㅂ
+  '3,6':  { char:'ㄽ', idx:12 },  // ㄹ+ㅅ
+  '3,11': { char:'ㄾ', idx:13 },  // ㄹ+ㅌ
+  '3,12': { char:'ㄿ', idx:14 },  // ㄹ+ㅍ
+  '3,13': { char:'ㅀ', idx:15 },  // ㄹ+ㅎ
+  '5,6':  { char:'ㅄ', idx:18 },  // ㅂ+ㅅ
+};
+
+// ── State: two syllables ──
+// syl[i] = { consonant, vowel, batchim, consonantDoubled, vowelCompound, batchimDouble }
+const syl = [
+  { consonant: null, vowel: null, batchim: null, consonantDoubled: false, vowelCompound: null, batchimDouble: null },
+  { consonant: null, vowel: null, batchim: null, consonantDoubled: false, vowelCompound: null, batchimDouble: null },
+];
+let activeSyl = 0;
+
+// ── 오디오 출력 항상 열어두기 (OS fade-in 방지) ──
+let _keepAliveCtx = null;
+
+function startAudioKeepalive() {
+  if (_keepAliveCtx) {
+    // 이미 있으면 suspended 상태면 resume
+    if (_keepAliveCtx.state === 'suspended') {
+      _keepAliveCtx.resume().catch(() => {});
+    }
+    return;
+  }
+  try {
+    _keepAliveCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = _keepAliveCtx.createOscillator();
+    const gain = _keepAliveCtx.createGain();
+    gain.gain.value = 0;
+    oscillator.connect(gain);
+    gain.connect(_keepAliveCtx.destination);
+    oscillator.start();
+  } catch(e) {}
+}
+
+// 첫 번째 유저 인터랙션에서 바로 오디오 컨텍스트 초기화 (iOS는 touchstart 필요)
+function initAudioOnce() {
+  startAudioKeepalive();
+  document.removeEventListener('pointerdown', initAudioOnce);
+  document.removeEventListener('touchstart', initAudioOnce);
+}
+document.addEventListener('pointerdown', initAudioOnce, { once: true });
+document.addEventListener('touchstart', initAudioOnce, { once: true, passive: true });
+
+function switchSyl(i) {
+  activeSyl = i;
+  document.getElementById('tab0').classList.toggle('active', i === 0);
+  document.getElementById('tab1').classList.toggle('active', i === 1);
+  // Update button selected states to reflect current syllable
+  syncButtonStates();
+  updatePartsRow();
+  updateBatchimResetBtn();
+}
+
+function syncButtonStates() {
+  const s = syl[activeSyl];
+  updateConsonantBtns();
+  // Vowels: highlight first vowel (and second if compound)
+  document.querySelectorAll('.fidget-btn.vowel').forEach((b, i) => {
+    const isFirst = i === s.vowel;
+    // If compound, also highlight second vowel button
+    let isSecond = false;
+    if (s.vowelCompound && s.vowel !== null) {
+      const key = Object.keys(COMPOUND_VOWEL).find(k => COMPOUND_VOWEL[k].idx === s.vowelCompound.idx);
+      if (key) {
+        const secondIdx = parseInt(key.split(',')[1]);
+        isSecond = i === secondIdx;
+      }
+    }
+    b.classList.toggle('selected', isFirst || isSecond);
+  });
+  // Batchim: highlight first (and second if double)
+  document.querySelectorAll('.fidget-btn.batchim').forEach((b, i) => {
+    const isFirst = i === s.batchim;
+    let isSecond = false;
+    if (s.batchimDouble && s.batchim !== null) {
+      const key = Object.keys(DOUBLE_BATCHIM).find(k => DOUBLE_BATCHIM[k].idx === s.batchimDouble.idx);
+      if (key) {
+        const secondIdx = parseInt(key.split(',')[1]);
+        isSecond = i === secondIdx;
+      }
+    }
+    b.classList.toggle('selected', isFirst || isSecond);
+  });
+}
+
+function getConsonantInitial(s) {
+  if (s.consonant === null) return null;
+  const c = consonants[s.consonant];
+  if (s.consonantDoubled && c.doubled !== null) return c.doubled;
+  return c.initial;
+}
+
+function getVowelIdx(s) {
+  if (s.vowel === null) return null;
+  if (s.vowelCompound) return s.vowelCompound.idx;
+  return vowels[s.vowel].idx;
+}
+
+function getBatchimIdx(s) {
+  if (s.batchim === null) return 0;
+  if (s.batchimDouble) return s.batchimDouble.idx;
+  return batchims[s.batchim].idx;
+}
+
+function getConsonantDisplay(s) {
+  if (s.consonant === null) return null;
+  const c = consonants[s.consonant];
+  if (s.consonantDoubled && c.doubled !== null) return DOUBLED_CHAR[s.consonant] || c.char;
+  return c.char;
+}
+
+function getVowelDisplay(s) {
+  if (s.vowel === null) return null;
+  if (s.vowelCompound) return s.vowelCompound.char;
+  return vowels[s.vowel].char;
+}
+
+function getBatchimDisplay(s) {
+  if (s.batchim === null) return null;
+  if (s.batchimDouble) return s.batchimDouble.char;
+  return batchims[s.batchim].char;
+}
+
+function compose(s) {
+  if (s.consonant === null || s.vowel === null) return null;
+  const cho  = getConsonantInitial(s);
+  const jung = getVowelIdx(s);
+  const jong = getBatchimIdx(s);
+  if (cho === null || jung === null) return null;
+  return String.fromCharCode(0xAC00 + (cho * 21 + jung) * 28 + jong);
+}
+
+function getSlotDisplay(s) {
+  const ch = compose(s);
+  if (ch) return { char: ch, color: consonants[s.consonant].color };
+  if (s.consonant !== null) return { char: getConsonantDisplay(s), color: consonants[s.consonant].color };
+  if (s.vowel !== null) return { char: getVowelDisplay(s), color: vowels[s.vowel].color };
+  return null;
+}
+
+function updateSlots() {
+  [0, 1].forEach(i => {
+    const slot = document.getElementById('slot' + i);
+    const tab  = document.getElementById('tab' + i);
+    const tabChar = document.getElementById('tabChar' + i);
+    const info = getSlotDisplay(syl[i]);
+
+    if (info) {
+      slot.textContent = info.char;
+      slot.style.color = info.color;
+      slot.classList.add('filled');
+      tabChar.textContent = info.char;
+      tabChar.style.color = info.color;
+      tab.classList.add('has-content');
+    } else {
+      slot.textContent = '?';
+      slot.style.color = '';
+      slot.classList.remove('filled');
+      tabChar.textContent = i === 0 ? '?' : '+';
+      tabChar.style.color = '';
+      tab.classList.remove('has-content');
+    }
+
+    slot.classList.toggle('active-slot', i === activeSyl);
+  });
+}
+
+function updatePartsRow() {
+  const row = document.getElementById('partsRow');
+  row.innerHTML = '';
+  const s = syl[activeSyl];
+
+  const parts = [
+    s.consonant !== null ? { char: getConsonantDisplay(s), color: consonants[s.consonant].color } : null,
+    s.vowel     !== null ? { char: getVowelDisplay(s),     color: vowels[s.vowel].color }         : null,
+    s.batchim   !== null ? { char: getBatchimDisplay(s),   color: batchims[s.batchim].color }     : null,
+  ].filter(Boolean);
+
+  parts.forEach((p, i) => {
+    if (i > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'part-chip-sep';
+      sep.textContent = '+';
+      row.appendChild(sep);
+    }
+    const chip = document.createElement('span');
+    chip.className = 'part-chip active';
+    chip.textContent = p.char;
+    chip.style.color = p.color;
+    chip.style.borderColor = p.color + '99';
+    row.appendChild(chip);
+  });
+}
+
+function updateBatchimResetBtn() {
+  const btn = document.getElementById('batchimResetBtn');
+  btn.classList.toggle('active', syl[activeSyl].batchim !== null);
+}
+
+// ── Translation ──
+let _translateTimer = null;
+const TRANSLATION_LABELS = {
+  en: 'Translation', zh: '翻译', ja: '翻訳', es: 'Traducción',
+  fr: 'Traduction', ru: 'Перевод', pt: 'Tradução', ar: 'ترجمة',
+  hi: 'अनुवाद', it: 'Traduzione'
+};
+const LANG_NAMES = {
+  en: 'English', zh: 'Chinese (Simplified)', ja: 'Japanese', es: 'Spanish',
+  fr: 'French', ru: 'Russian', pt: 'Portuguese', ar: 'Arabic',
+  hi: 'Hindi', it: 'Italian'
+};
+
+async function translateWord(text) {
+  const L = currentLang || LANGS[0];
+  const label = document.getElementById('translationLabel');
+  const display = document.getElementById('translationText');
+  const loading = document.getElementById('translationLoading');
+  const targetLang = LANG_NAMES[L.code] || 'English';
+
+  label.textContent = TRANSLATION_LABELS[L.code] || 'Translation';
+  display.textContent = '';
+  loading.style.display = 'inline';
+
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, targetLang })
+    });
+    const data = await res.json();
+    if (data.error) {
+      display.textContent = '⚠️ ' + (data.error || 'Error');
+      return;
+    }
+    display.textContent = data.result || '—';
+  } catch(e) {
+    display.textContent = '⚠️ Network error';
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+function triggerTranslation() {
+  const ch0 = compose(syl[0]);
+  const ch1 = compose(syl[1]);
+  const text = [ch0, ch1].filter(Boolean).join('');
+  if (!text) {
+    document.getElementById('translationText').textContent = '';
+    document.getElementById('translationLoading').style.display = 'none';
+    return;
+  }
+  translateWord(text);
+}
+
+function scheduleTranslation() {
+  // No-op: translation is now manual via Submit button
+}
+
+function handleSelect(type, index, btn) {
+  btn.classList.add('pressed');
+  setTimeout(() => btn.classList.remove('pressed'), 150);
+
+  const s = syl[activeSyl];
+
+  if (type === 'consonant') {
+    if (s.consonant === index) {
+      // 같은 버튼 두 번 → 쌍자음 토글
+      const c = consonants[index];
+      if (c.doubled !== null) {
+        s.consonantDoubled = !s.consonantDoubled;
+      } else {
+        // 쌍자음 없으면 선택 해제
+        s.consonant = null;
+        s.consonantDoubled = false;
+      }
+    } else {
+      // 새 자음 선택
+      document.querySelectorAll('.fidget-btn.consonant').forEach(b => b.classList.remove('selected'));
+      s.consonant = index;
+      s.consonantDoubled = false;
+      btn.classList.add('selected');
+    }
+    // 버튼 텍스트 업데이트 (쌍자음 표시)
+    updateConsonantBtns();
+
+  } else if (type === 'vowel') {
+    if (s.vowel === null) {
+      // 첫 모음 선택
+      document.querySelectorAll('.fidget-btn.vowel').forEach(b => b.classList.remove('selected'));
+      s.vowel = index;
+      s.vowelCompound = null;
+      btn.classList.add('selected');
+    } else if (s.vowel === index && !s.vowelCompound) {
+      // 같은 모음 → 선택 해제
+      s.vowel = null;
+      s.vowelCompound = null;
+      document.querySelectorAll('.fidget-btn.vowel').forEach(b => b.classList.remove('selected'));
+    } else {
+      // 다른 모음 → 복합모음 시도
+      const key = `${s.vowel},${index}`;
+      const compound = COMPOUND_VOWEL[key];
+      if (compound) {
+        s.vowelCompound = compound;
+        // 두 번째 버튼도 하이라이트
+        btn.classList.add('selected');
+      } else {
+        // 복합모음 안 되면 새 모음으로 교체
+        document.querySelectorAll('.fidget-btn.vowel').forEach(b => b.classList.remove('selected'));
+        s.vowel = index;
+        s.vowelCompound = null;
+        btn.classList.add('selected');
+      }
+    }
+
+  } else if (type === 'batchim') {
+    if (s.batchim === null) {
+      // 첫 받침 선택
+      document.querySelectorAll('.fidget-btn.batchim').forEach(b => b.classList.remove('selected'));
+      s.batchim = index;
+      s.batchimDouble = null;
+      btn.classList.add('selected');
+    } else if (s.batchim === index && !s.batchimDouble) {
+      // 같은 받침 → 선택 해제
+      s.batchim = null;
+      s.batchimDouble = null;
+      document.querySelectorAll('.fidget-btn.batchim').forEach(b => b.classList.remove('selected'));
+    } else if (s.batchimDouble) {
+      // 이미 겹받침 → 해제하고 새 단일 받침
+      document.querySelectorAll('.fidget-btn.batchim').forEach(b => b.classList.remove('selected'));
+      s.batchim = index;
+      s.batchimDouble = null;
+      btn.classList.add('selected');
+    } else {
+      // 두 번째 받침 → 겹받침 시도
+      const key = `${s.batchim},${index}`;
+      const double = DOUBLE_BATCHIM[key];
+      if (double) {
+        s.batchimDouble = double;
+        btn.classList.add('selected');
+      } else {
+        // 겹받침 안 되면 새 받침으로 교체
+        document.querySelectorAll('.fidget-btn.batchim').forEach(b => b.classList.remove('selected'));
+        s.batchim = index;
+        s.batchimDouble = null;
+        btn.classList.add('selected');
+      }
+    }
+  }
+
+  // Animate active slot
+  const slot = document.getElementById('slot' + activeSyl);
+  slot.classList.remove('pop');
+  void slot.offsetWidth;
+  slot.classList.add('pop');
+
+  updateSlots();
+  updatePartsRow();
+  updateBatchimResetBtn();
+  scheduleTranslation();
+}
+
+function updateConsonantBtns() {
+  const s = syl[activeSyl];
+  document.querySelectorAll('.fidget-btn.consonant').forEach((b, i) => {
+    b.classList.toggle('selected', i === s.consonant);
+    // Show doubled char if this button is selected and doubled
+    const mainSpan = b.querySelector('span:not(.romanized):not(.pantone-badge)');
+    if (mainSpan) {
+      if (i === s.consonant && s.consonantDoubled && consonants[i].doubled !== null) {
+        mainSpan.textContent = DOUBLED_CHAR[i] || consonants[i].char;
+      } else {
+        mainSpan.textContent = consonants[i].char;
+      }
+    }
+  });
+}
+
+function resetBatchim() {
+  syl[activeSyl].batchim = null;
+  syl[activeSyl].batchimDouble = null;
+  document.querySelectorAll('.fidget-btn.batchim').forEach(b => b.classList.remove('selected'));
+  updateBatchimResetBtn();
+  updateSlots();
+  updatePartsRow();
+  scheduleTranslation();
+}
+
+function resetAll() {
+  syl[0] = { consonant: null, vowel: null, batchim: null, consonantDoubled: false, vowelCompound: null, batchimDouble: null };
+  syl[1] = { consonant: null, vowel: null, batchim: null, consonantDoubled: false, vowelCompound: null, batchimDouble: null };
+  activeSyl = 0;
+  switchSyl(0);
+  updateSlots();
+  updatePartsRow();
+  document.querySelectorAll('.fidget-btn.consonant').forEach((b, i) => {
+    const mainSpan = b.querySelector('span:not(.romanized):not(.pantone-badge)');
+    if (mainSpan) mainSpan.textContent = consonants[i].char;
+  });
+  document.getElementById('batchimResetBtn').classList.remove('active');
+  document.getElementById('translationText').textContent = '';
+  document.getElementById('translationLabel').textContent = '';
+  document.getElementById('translationLoading').style.display = 'none';
+}
+
+// ── Azure TTS Config ──
+// ── 최적 한국어 목소리 캐시 ──
+let _koVoice = null;
+
+function getBestKoVoice() {
+  if (_koVoice) return _koVoice;
+  const voices = window.speechSynthesis.getVoices();
+  const priority = [
+    v => /google.*korean/i.test(v.name),
+    v => /google/i.test(v.name) && v.lang === 'ko-KR',
+    v => /microsoft.*heami/i.test(v.name),
+    v => /microsoft/i.test(v.name) && v.lang === 'ko-KR',
+    v => v.lang === 'ko-KR',
+    v => v.lang.startsWith('ko'),
+  ];
+  for (const test of priority) {
+    const match = voices.find(test);
+    if (match) { _koVoice = match; return match; }
+  }
+  return null;
+}
+
+// ── Audio ──
+function speak() {
+  const L = currentLang || LANGS[0];
+  const speakerBtn = document.getElementById('speakerBtn');
+  const soundWaves = document.getElementById('soundWaves');
+
+  const ch0 = compose(syl[0]) || (syl[0].consonant !== null ? consonants[syl[0].consonant].char : null) || (syl[0].vowel !== null ? vowels[syl[0].vowel].char : null);
+  const ch1 = compose(syl[1]) || (syl[1].consonant !== null ? consonants[syl[1].consonant].char : null) || (syl[1].vowel !== null ? vowels[syl[1].vowel].char : null);
+
+  const text = [ch0, ch1].filter(Boolean).join('');
+  if (!text) { showToast(L.toastNeed); return; }
+  if (!('speechSynthesis' in window)) { showToast(L.toastFail); return; }
+
+  speakerBtn.classList.add('playing');
+  soundWaves.classList.add('active');
+
+  const done = () => {
+    speakerBtn.classList.remove('playing');
+    soundWaves.classList.remove('active');
+  };
+
+  // iOS Safari: speechSynthesis를 유저 제스처 컨텍스트에서 직접 호출
+  window.speechSynthesis.cancel();
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = 0.8;
+  u.pitch = 1.0;
+  u.volume = 1.0;
+
+  // 가능하면 한국어 voice 찾기
+  const voices = window.speechSynthesis.getVoices();
+  const koVoice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
+  if (koVoice) u.voice = koVoice;
+
+  u.onend = done;
+  u.onerror = done;
+
+  window.speechSynthesis.speak(u);
+}
+
+
+function isLight(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return (r*299 + g*587 + b*114)/1000 > 150;
+}
+
+function buildGrid(data, containerId, type) {
+  const container = document.getElementById(containerId);
+  data.forEach((item, i) => {
+    const btn = document.createElement('button');
+    btn.className = `fidget-btn ${type}`;
+    btn.style.background = item.color;
+    const light = isLight(item.color);
+    btn.style.color = light ? '#000' : '#fff';
+
+    const span = document.createElement('span');
+    span.textContent = item.char;
+
+    const roman = document.createElement('span');
+    roman.className = 'romanized';
+    roman.textContent = item.roman;
+    roman.style.color = light ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.8)';
+
+    if (item.pantone) {
+      const p = document.createElement('span');
+      p.className = 'pantone-badge';
+      p.textContent = item.pantone;
+      btn.appendChild(p);
+    }
+
+    btn.appendChild(span);
+    btn.appendChild(roman);
+    btn.addEventListener('click', () => handleSelect(type, i, btn));
+    container.appendChild(btn);
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+buildLangPicker();
+buildGrid(consonants, 'consonantGrid', 'consonant');
+buildGrid(vowels,     'vowelGrid',     'vowel');
+buildGrid(batchims,   'batchimGrid',   'batchim');
+updateSlots();
+</script>
+</body>
+</html>
