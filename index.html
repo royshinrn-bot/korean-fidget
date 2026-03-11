@@ -830,7 +830,9 @@ function showOnboarding(lang) {
     </div>
   `).join('');
   document.getElementById('onboardingStartBtn').textContent = data.start;
-  document.getElementById('onboardingOverlay').classList.add('visible');
+  const overlay = document.getElementById('onboardingOverlay');
+  overlay.scrollTop = 0;
+  overlay.classList.add('visible');
 }
 
 function closeOnboarding() {
