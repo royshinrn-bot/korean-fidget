@@ -733,7 +733,7 @@ async function selectCustomLang() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -832,11 +832,7 @@ function showOnboarding(lang) {
   document.getElementById('onboardingStartBtn').textContent = data.start;
   const overlay = document.getElementById('onboardingOverlay');
   overlay.classList.add('visible');
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      overlay.scrollTop = 0;
-    });
-  });
+  setTimeout(() => { overlay.scrollTop = 0; }, 100);
 }
 
 function closeOnboarding() {
@@ -1178,7 +1174,7 @@ async function translateWord(text) {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 100,
@@ -1397,11 +1393,7 @@ function speak() {
 
   const text = [ch0, ch1].filter(Boolean).join('');
   if (!text) { showToast(L.toastNeed); return; }
-
   if (!('speechSynthesis' in window)) { showToast(L.toastFail); return; }
-
-  // 매번 최신 voice 목록에서 다시 찾기
-  _koVoice = null;
 
   speakerBtn.classList.add('playing');
   soundWaves.classList.add('active');
@@ -1411,71 +1403,24 @@ function speak() {
     soundWaves.classList.remove('active');
   };
 
-  // 오디오 컨텍스트 resume (suspended 방지)
-  startAudioKeepalive();
+  // iOS Safari: speechSynthesis를 유저 제스처 컨텍스트에서 직접 호출
+  window.speechSynthesis.cancel();
 
-  async function doSpeak() {
-    const voice = getBestKoVoice();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = 0.8;
+  u.pitch = 1.0;
+  u.volume = 1.0;
 
-    // 아주 짧은 가청 beep으로 OS 오디오 하드웨어 강제 wake
-    function wakeAudio() {
-      return new Promise(resolve => {
-        try {
-          const ctx = _keepAliveCtx || new (window.AudioContext || window.webkitAudioContext)();
-          if (ctx.state === 'suspended') ctx.resume();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.frequency.value = 1;        // 1Hz — 들리지 않음
-          gain.gain.setValueAtTime(0.001, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 0.15);
-          osc.onended = resolve;
-          setTimeout(resolve, 200); // fallback
-        } catch(e) { setTimeout(resolve, 200); }
-      });
-    }
-
-    function sayOnce(txt) {
-      return new Promise(resolve => {
-        const u = new SpeechSynthesisUtterance(txt);
-        u.lang = 'ko-KR'; u.rate = 0.7; u.pitch = 1.05; u.volume = 1.0;
-        if (voice) u.voice = voice;
-        u.onend = resolve;
-        u.onerror = resolve;
-        window.speechSynthesis.speak(u);
-      });
-    }
-
-    window.speechSynthesis.cancel();
-    await wakeAudio();                    // 하드웨어 깨우기
-    await new Promise(r => setTimeout(r, 50));
-    await sayOnce(text);                  // 1회 재생
-    await new Promise(r => setTimeout(r, 1000));
-    await wakeAudio();                    // 2회 전 다시 깨우기
-    await sayOnce(text);                  // 2회 재생
-    done();
-  }
-
-  let _fired = false;
-  function fireSpeech() {
-    if (_fired) return;
-    _fired = true;
-    doSpeak(); // 딜레이 없이 바로 실행
-  }
-
+  // 가능하면 한국어 voice 찾기
   const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    fireSpeech();
-  } else {
-    window.speechSynthesis.onvoiceschanged = () => {
-      window.speechSynthesis.onvoiceschanged = null;
-      fireSpeech();
-    };
-    setTimeout(fireSpeech, 500);
-  }
+  const koVoice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
+  if (koVoice) u.voice = koVoice;
+
+  u.onend = done;
+  u.onerror = done;
+
+  window.speechSynthesis.speak(u);
 }
 
 
