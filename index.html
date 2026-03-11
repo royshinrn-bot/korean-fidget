@@ -1211,13 +1211,18 @@ function handleSelect(type, index, btn) {
       s.vowel = null;
       s.vowelCompound = null;
       document.querySelectorAll('.fidget-btn.vowel').forEach(b => b.classList.remove('selected'));
+    } else if (s.vowelCompound) {
+      // 복합모음 완성 상태에서 다른 거 누르면 → 새 모음으로 교체
+      document.querySelectorAll('.fidget-btn.vowel').forEach(b => b.classList.remove('selected'));
+      s.vowel = index;
+      s.vowelCompound = null;
+      btn.classList.add('selected');
     } else {
       // 다른 모음 → 복합모음 시도
       const key = `${s.vowel},${index}`;
       const compound = COMPOUND_VOWEL[key];
       if (compound) {
         s.vowelCompound = compound;
-        // 두 번째 버튼도 하이라이트
         btn.classList.add('selected');
       } else {
         // 복합모음 안 되면 새 모음으로 교체
