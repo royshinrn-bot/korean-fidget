@@ -1395,36 +1395,45 @@ function _doSpeak(text) {
     // Re-check voices after cancel (Android sometimes reloads them)
     _loadVoices();
 
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR';
-    u.rate = 0.5;
-    u.pitch = 1.0;
-    u.volume = 1.0;
-
     const koVoice = getBestKoVoiceAndroid();
-    if (koVoice) u.voice = koVoice;
 
-    u.onend = done;
-    u.onerror = (e) => {
-      // 'interrupted' means a new speak() cancelled this one — not a real error
-      if (e.error === 'interrupted' || e.error === 'canceled') { done(); return; }
-      done();
-      // Only show error toast for real failures
-      if (e.error !== 'interrupted' && e.error !== 'canceled') {
-        const L = currentLang || LANGS[0];
-        showToast(L.toastFail + ' (' + e.error + ')');
-      }
-    };
+    function makeUtterance(t) {
+      const u = new SpeechSynthesisUtterance(t);
+      u.lang = 'ko-KR';
+      u.rate = 0.4;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+      if (koVoice) u.voice = koVoice;
+      return u;
+    }
+
+    const syllables = [...text]; // split into individual chars
+    let idx = 0;
+
+    function speakNext() {
+      if (idx >= syllables.length) { done(); return; }
+      const u = makeUtterance(syllables[idx]);
+      idx++;
+      u.onend = () => {
+        if (idx < syllables.length) {
+          // pause 400ms between syllables
+          setTimeout(speakNext, 400);
+        } else {
+          done();
+        }
+      };
+      u.onerror = (e) => {
+        if (e.error === 'interrupted' || e.error === 'canceled') { done(); return; }
+        done();
+      };
+      window.speechSynthesis.speak(u);
+    }
 
     // AudioContext must be resumed on Android before speak
     if (_keepAliveCtx && _keepAliveCtx.state === 'suspended') {
-      _keepAliveCtx.resume().then(() => {
-        window.speechSynthesis.speak(u);
-      }).catch(() => {
-        window.speechSynthesis.speak(u);
-      });
+      _keepAliveCtx.resume().then(speakNext).catch(speakNext);
     } else {
-      window.speechSynthesis.speak(u);
+      speakNext();
     }
   }, 50);
 }
