@@ -1400,7 +1400,7 @@ function _doSpeak(text) {
     function makeUtterance(t) {
       const u = new SpeechSynthesisUtterance(t);
       u.lang = 'ko-KR';
-      u.rate = 0.2;
+      u.rate = 0.3;
       u.pitch = 1.0;
       u.volume = 1.0;
       if (koVoice) u.voice = koVoice;
@@ -1417,7 +1417,7 @@ function _doSpeak(text) {
       u.onend = () => {
         if (idx < syllables.length) {
           // pause 400ms between syllables
-          setTimeout(speakNext, 500);
+          setTimeout(speakNext, 400);
         } else {
           done();
         }
