@@ -1345,21 +1345,18 @@ function getBestKoVoice() {
 }
 
 // ── Audio ──
-
-// Android Chrome: voices load async, must wait for voiceschanged
+// ── Android: voices load async, must wait for voiceschanged ──
 let _voicesReady = false;
 let _cachedVoices = [];
-
 function _loadVoices() {
   const v = window.speechSynthesis.getVoices();
   if (v.length > 0) { _cachedVoices = v; _voicesReady = true; }
 }
 _loadVoices();
-if (window.speechSynthesis.onvoiceschanged !== undefined) {
+if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
   window.speechSynthesis.onvoiceschanged = _loadVoices;
 }
-
-function getBestKoVoiceAndroid() {
+function _getBestKoVoice() {
   const voices = _cachedVoices.length ? _cachedVoices : window.speechSynthesis.getVoices();
   const priority = [
     v => /google.*korean/i.test(v.name),
@@ -1376,85 +1373,74 @@ function getBestKoVoiceAndroid() {
   return null;
 }
 
-function _doSpeak(text) {
+function speak() {
+  const L = currentLang || LANGS[0];
   const speakerBtn = document.getElementById('speakerBtn');
   const soundWaves = document.getElementById('soundWaves');
 
+  const ch0 = compose(syl[0]) || (syl[0].consonant !== null ? consonants[syl[0].consonant].char : null) || (syl[0].vowel !== null ? vowels[syl[0].vowel].char : null);
+  const ch1 = compose(syl[1]) || (syl[1].consonant !== null ? consonants[syl[1].consonant].char : null) || (syl[1].vowel !== null ? vowels[syl[1].vowel].char : null);
+
+  const text = [ch0, ch1].filter(Boolean).join('');
+  if (!text) { showToast(L.toastNeed); return; }
+  if (!('speechSynthesis' in window)) { showToast(L.toastFail); return; }
+
   speakerBtn.classList.add('playing');
   soundWaves.classList.add('active');
+
   const done = () => {
     speakerBtn.classList.remove('playing');
     soundWaves.classList.remove('active');
   };
 
-  // Android: cancel() then immediate speak() causes 'interrupted' error
-  // Wait a tick after cancel before speaking
-  window.speechSynthesis.cancel();
-
-  setTimeout(() => {
-    // Re-check voices after cancel (Android sometimes reloads them)
-    _loadVoices();
-
-    const koVoice = getBestKoVoiceAndroid();
-
-    function makeUtterance(t) {
-      const u = new SpeechSynthesisUtterance(t);
-      u.lang = 'ko-KR';
-      u.rate = 0.3;
-      u.pitch = 1.0;
-      u.volume = 1.0;
-      if (koVoice) u.voice = koVoice;
-      return u;
-    }
-
-    const syllables = [...text]; // split into individual chars
-    let idx = 0;
-
-    function speakNext() {
-      if (idx >= syllables.length) { done(); return; }
-      const u = makeUtterance(syllables[idx]);
-      idx++;
-      u.onend = () => {
-        if (idx < syllables.length) {
-          // pause 400ms between syllables
-          setTimeout(speakNext, 400);
-        } else {
-          done();
-        }
-      };
-      u.onerror = (e) => {
-        if (e.error === 'interrupted' || e.error === 'canceled') { done(); return; }
-        done();
-      };
-      window.speechSynthesis.speak(u);
-    }
-
-    // AudioContext must be resumed on Android before speak
-    if (_keepAliveCtx && _keepAliveCtx.state === 'suspended') {
-      _keepAliveCtx.resume().then(speakNext).catch(speakNext);
-    } else {
-      speakNext();
-    }
-  }, 50);
-}
-
-function speak() {
-  const L = currentLang || LANGS[0];
-  const ch0 = compose(syl[0]) || (syl[0].consonant !== null ? consonants[syl[0].consonant].char : null) || (syl[0].vowel !== null ? vowels[syl[0].vowel].char : null);
-  const ch1 = compose(syl[1]) || (syl[1].consonant !== null ? consonants[syl[1].consonant].char : null) || (syl[1].vowel !== null ? vowels[syl[1].vowel].char : null);
-  const text = [ch0, ch1].filter(Boolean).join('');
-  if (!text) { showToast(L.toastNeed); return; }
-  if (!('speechSynthesis' in window)) { showToast(L.toastFail); return; }
-
-  // Ensure AudioContext is alive (Android requires this)
+  // Ensure AudioContext is alive (Android requires user gesture)
   startAudioKeepalive();
 
-  // Android: voices load async — try loading, wait if not ready
+  // Android: voices may not be loaded yet — reload and wait if needed
   _loadVoices();
+
+  const _speak = () => {
+    // Android: cancel() then immediate speak() causes 'interrupted' — wait 50ms
+    window.speechSynthesis.cancel();
+    setTimeout(() => {
+      const koVoice = _getBestKoVoice();
+      const syllables = [...text];
+      let idx = 0;
+
+      function makeU(t) {
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = 'ko-KR';
+        u.rate = 0.7;
+        u.pitch = 1.0;
+        u.volume = 1.0;
+        if (koVoice) u.voice = koVoice;
+        return u;
+      }
+
+      function speakNext() {
+        if (idx >= syllables.length) { done(); return; }
+        const u = makeU(syllables[idx++]);
+        u.onend = () => { if (idx < syllables.length) setTimeout(speakNext, 10); else done(); };
+        u.onerror = (e) => {
+          if (e.error === 'interrupted' || e.error === 'canceled') { done(); return; }
+          done();
+        };
+        window.speechSynthesis.speak(u);
+      }
+
+      // Resume AudioContext if suspended before speaking
+      if (_keepAliveCtx && _keepAliveCtx.state === 'suspended') {
+        _keepAliveCtx.resume().then(speakNext).catch(speakNext);
+      } else {
+        speakNext();
+      }
+    }, 50);
+  };
+
   if (!_voicesReady) {
-    setTimeout(() => { _loadVoices(); _doSpeak(text); }, 300);
+    setTimeout(() => { _loadVoices(); _speak(); }, 300);
   } else {
-    _doSpeak(text);
+    _speak();
   }
 }
 
