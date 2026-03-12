@@ -1345,44 +1345,108 @@ function getBestKoVoice() {
 }
 
 // ── Audio ──
-function speak() {
-  const L = currentLang || LANGS[0];
+
+// Android Chrome: voices load async, must wait for voiceschanged
+let _voicesReady = false;
+let _cachedVoices = [];
+
+function _loadVoices() {
+  const v = window.speechSynthesis.getVoices();
+  if (v.length > 0) { _cachedVoices = v; _voicesReady = true; }
+}
+_loadVoices();
+if (window.speechSynthesis.onvoiceschanged !== undefined) {
+  window.speechSynthesis.onvoiceschanged = _loadVoices;
+}
+
+function getBestKoVoiceAndroid() {
+  const voices = _cachedVoices.length ? _cachedVoices : window.speechSynthesis.getVoices();
+  const priority = [
+    v => /google.*korean/i.test(v.name),
+    v => /google/i.test(v.name) && v.lang === 'ko-KR',
+    v => /microsoft.*heami/i.test(v.name),
+    v => /microsoft/i.test(v.name) && v.lang === 'ko-KR',
+    v => v.lang === 'ko-KR',
+    v => v.lang.startsWith('ko'),
+  ];
+  for (const test of priority) {
+    const match = voices.find(test);
+    if (match) return match;
+  }
+  return null;
+}
+
+function _doSpeak(text) {
   const speakerBtn = document.getElementById('speakerBtn');
   const soundWaves = document.getElementById('soundWaves');
 
-  const ch0 = compose(syl[0]) || (syl[0].consonant !== null ? consonants[syl[0].consonant].char : null) || (syl[0].vowel !== null ? vowels[syl[0].vowel].char : null);
-  const ch1 = compose(syl[1]) || (syl[1].consonant !== null ? consonants[syl[1].consonant].char : null) || (syl[1].vowel !== null ? vowels[syl[1].vowel].char : null);
-
-  const text = [ch0, ch1].filter(Boolean).join('');
-  if (!text) { showToast(L.toastNeed); return; }
-  if (!('speechSynthesis' in window)) { showToast(L.toastFail); return; }
-
   speakerBtn.classList.add('playing');
   soundWaves.classList.add('active');
-
   const done = () => {
     speakerBtn.classList.remove('playing');
     soundWaves.classList.remove('active');
   };
 
-  // iOS Safari: speechSynthesis를 유저 제스처 컨텍스트에서 직접 호출
+  // Android: cancel() then immediate speak() causes 'interrupted' error
+  // Wait a tick after cancel before speaking
   window.speechSynthesis.cancel();
 
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ko-KR';
-  u.rate = 0.8;
-  u.pitch = 1.0;
-  u.volume = 1.0;
+  setTimeout(() => {
+    // Re-check voices after cancel (Android sometimes reloads them)
+    _loadVoices();
 
-  // 가능하면 한국어 voice 찾기
-  const voices = window.speechSynthesis.getVoices();
-  const koVoice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
-  if (koVoice) u.voice = koVoice;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.8;
+    u.pitch = 1.0;
+    u.volume = 1.0;
 
-  u.onend = done;
-  u.onerror = done;
+    const koVoice = getBestKoVoiceAndroid();
+    if (koVoice) u.voice = koVoice;
 
-  window.speechSynthesis.speak(u);
+    u.onend = done;
+    u.onerror = (e) => {
+      // 'interrupted' means a new speak() cancelled this one — not a real error
+      if (e.error === 'interrupted' || e.error === 'canceled') { done(); return; }
+      done();
+      // Only show error toast for real failures
+      if (e.error !== 'interrupted' && e.error !== 'canceled') {
+        const L = currentLang || LANGS[0];
+        showToast(L.toastFail + ' (' + e.error + ')');
+      }
+    };
+
+    // AudioContext must be resumed on Android before speak
+    if (_keepAliveCtx && _keepAliveCtx.state === 'suspended') {
+      _keepAliveCtx.resume().then(() => {
+        window.speechSynthesis.speak(u);
+      }).catch(() => {
+        window.speechSynthesis.speak(u);
+      });
+    } else {
+      window.speechSynthesis.speak(u);
+    }
+  }, 50);
+}
+
+function speak() {
+  const L = currentLang || LANGS[0];
+  const ch0 = compose(syl[0]) || (syl[0].consonant !== null ? consonants[syl[0].consonant].char : null) || (syl[0].vowel !== null ? vowels[syl[0].vowel].char : null);
+  const ch1 = compose(syl[1]) || (syl[1].consonant !== null ? consonants[syl[1].consonant].char : null) || (syl[1].vowel !== null ? vowels[syl[1].vowel].char : null);
+  const text = [ch0, ch1].filter(Boolean).join('');
+  if (!text) { showToast(L.toastNeed); return; }
+  if (!('speechSynthesis' in window)) { showToast(L.toastFail); return; }
+
+  // Ensure AudioContext is alive (Android requires this)
+  startAudioKeepalive();
+
+  // Android: voices load async — try loading, wait if not ready
+  _loadVoices();
+  if (!_voicesReady) {
+    setTimeout(() => { _loadVoices(); _doSpeak(text); }, 300);
+  } else {
+    _doSpeak(text);
+  }
 }
 
 
