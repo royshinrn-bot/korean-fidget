@@ -1417,7 +1417,7 @@ function _doSpeak(text) {
       u.onend = () => {
         if (idx < syllables.length) {
           // pause 400ms between syllables
-          setTimeout(speakNext, 800);
+          setTimeout(speakNext, 500);
         } else {
           done();
         }
