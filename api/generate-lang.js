@@ -3,9 +3,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { langName } = req.body;
-  if (!langName) {
+  const { langName } = req.body || {};
+
+  // ── 입력 검증: 정상 입력은 짧은 "언어 이름"뿐 ──
+  if (typeof langName !== 'string' || !langName.trim()) {
     return res.status(400).json({ error: 'Missing langName' });
+  }
+  // 40자 이하 + 프롬프트 탈출 문자 차단 → 공짜 LLM 프록시 악용 방지
+  if (langName.length > 40 || /[{}"`<>\\\n\r]/.test(langName)) {
+    return res.status(400).json({ error: 'Invalid langName' });
   }
 
   try {

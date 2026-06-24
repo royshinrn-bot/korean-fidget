@@ -3,9 +3,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { text, targetLang } = req.body;
-  if (!text || !targetLang) {
+  const { text, targetLang } = req.body || {};
+
+  // ── 입력 검증: 정상 입력은 한글 1~2글자뿐 ──
+  if (typeof text !== 'string' || typeof targetLang !== 'string') {
+    return res.status(400).json({ error: 'Invalid input' });
+  }
+  if (!text.trim() || !targetLang.trim()) {
     return res.status(400).json({ error: 'Missing text or targetLang' });
+  }
+  // text: 한글(음절/자모)만 허용, 최대 12자 → 영어 지시문 주입 자체가 불가능
+  if (text.length > 12 ||
+      !/^[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7A3\s]+$/.test(text)) {
+    return res.status(400).json({ error: 'Invalid text' });
+  }
+  // targetLang: 40자 이하 + 프롬프트 탈출 문자 차단
+  if (targetLang.length > 40 || /[{}"`<>\\\n\r]/.test(targetLang)) {
+    return res.status(400).json({ error: 'Invalid targetLang' });
   }
 
   try {
