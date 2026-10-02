@@ -212,6 +212,13 @@
     box-shadow: 0 0 0 3px var(--accent-soft);
     background: #fff;
   }
+  .syl-clear {
+    position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(60,60,67,0.3); color: #fff; font-size: 0.9rem; line-height: 1; font-weight: 700;
+    display: none; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s;
+  }
+  .syl-clear:hover { background: var(--accent); }
+  .syl-tile.active.filled .syl-clear { display: flex; }
   .syl-idx {
     font-size: 0.6rem; font-weight: 700; color: var(--text-soft);
     margin-bottom: 2px; transition: color 0.15s;
@@ -824,13 +831,22 @@ function renderSyllableRow() {
   for (let i = 0; i < sylCount; i++) {
     const tile = document.createElement('button');
     tile.className = 'syl-tile' + (i === activeSyl ? ' active' : '');
-    tile.innerHTML = `<span class="syl-idx">${i + 1}</span><span class="syl-char">?</span>`;
+    tile.innerHTML = `<span class="syl-idx">${i + 1}</span><span class="syl-char">?</span><span class="syl-clear" aria-label="clear">×</span>`;
     tile.onclick = () => switchSyl(i);
+    tile.querySelector('.syl-clear').addEventListener('click', (e) => { e.stopPropagation(); clearSyl(i); });
     row.appendChild(tile);
   }
   updateDisplay();
 }
 function switchSyl(i) {
+  activeSyl = i;
+  syncButtonStates();
+  updateDisplay();
+  updatePartsRow();
+  updateBatchimResetBtn();
+}
+function clearSyl(i) {
+  syl[i] = makeSyl();
   activeSyl = i;
   syncButtonStates();
   updateDisplay();
