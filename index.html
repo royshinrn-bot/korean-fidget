@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Korean Fidget">
+<script src="dict.js"></script>
 <style>
   :root {
     --bg: #F2F2F7;          /* iOS grouped background */
@@ -295,6 +296,16 @@
   }
   .submit-btn:hover { filter: brightness(0.96); }
   .submit-btn:active { transform: scale(0.96); }
+  .submit-btn:disabled, .submit-btn.disabled {
+    background: var(--divider); color: var(--text-soft); cursor: not-allowed;
+    box-shadow: none; opacity: 0.8;
+  }
+  .submit-btn:disabled:hover, .submit-btn.disabled:hover { filter: none; }
+  .submit-btn:disabled:active, .submit-btn.disabled:active { transform: none; }
+  .dict-note {
+    font-size: 0.62rem; color: var(--text-soft); text-align: center;
+    margin: -8px 0 18px; line-height: 1.5; padding: 0 8px;
+  }
   @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 
   /* ── Section Labels ── */
@@ -371,16 +382,8 @@
   <div class="overlay-title">언어를 선택해 주세요<br>Choose your language</div>
   <div class="overlay-subtitle">선택한 언어로 앱이 안내됩니다<br>The app will guide you in your chosen language</div>
   <div class="lang-grid" id="langGrid"></div>
-  <div class="custom-lang-section">
-    <div class="custom-lang-divider"><span>또는 / or</span></div>
-    <div class="custom-lang-label">직접 언어를 입력해 주세요 · Type your language</div>
-    <div class="custom-lang-row">
-      <input type="text" id="customLangInput" class="custom-lang-input"
-        placeholder="e.g. Swahili, Türkçe, Polski..." onkeydown="if(event.key==='Enter') selectCustomLang()" />
-      <button class="custom-lang-btn" onclick="selectCustomLang()" id="customLangBtn">→</button>
-    </div>
-    <div class="custom-lang-error" id="customLangError"></div>
-  </div>
+  <!-- custom language removed — app is fully offline with a fixed set of 10 languages -->
+
 </div>
 
 <!-- ── Onboarding Overlay ── -->
@@ -446,6 +449,7 @@
     <span class="translation-loading" id="translationLoading" style="display:none">✦</span>
     <button class="submit-btn" id="submitBtn" onclick="triggerTranslation()">Translate</button>
   </div>
+  <div class="dict-note" id="dictNote"></div>
 
   <!-- Consonants -->
   <div class="fidget-section">
@@ -634,42 +638,6 @@ const ONBOARDING = {
     'Qualsiasi feedback è gradito: <a href="mailto:foothillsfun.art@gmail.com" class="onboarding-email">foothillsfun.art@gmail.com</a>' ] }
 };
 
-async function selectCustomLang() {
-  const input = document.getElementById('customLangInput');
-  const btn = document.getElementById('customLangBtn');
-  const error = document.getElementById('customLangError');
-  const langName = input.value.trim();
-  if (!langName) return;
-  error.textContent = '';
-  btn.textContent = '✦';
-  btn.classList.add('loading');
-  try {
-    const res = await fetch('/api/generate-lang', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ langName })
-    });
-    const data = await res.json();
-    if (data.error) { error.textContent = data.error; return; }
-    const parsed = data.result;
-    if (!parsed.valid) { error.textContent = `"${langName}" 을 인식할 수 없어요. Try again!`; return; }
-    const customLang = {
-      code: 'custom_' + langName.toLowerCase().replace(/\s+/g, '_'),
-      flag: '🌐', name: parsed.displayName, native: parsed.displayName,
-      consonant: parsed.consonant, vowel: parsed.vowel, batchim: parsed.batchim,
-      optional: parsed.optional, instruction: parsed.instruction,
-      posTop: parsed.posTop, posMid: parsed.posMid, posBottom: parsed.posBottom,
-      toastNeed: parsed.toastNeed, toastEmpty: parsed.toastEmpty, toastFail: parsed.toastFail,
-      translateBtn: parsed.translationLabel,
-    };
-    ONBOARDING[customLang.code] = { start: parsed.onboardingStart, items: parsed.onboardingItems };
-    TRANSLATION_LABELS[customLang.code] = parsed.translationLabel;
-    LANG_NAMES[customLang.code] = langName;
-    input.value = '';
-    selectLang(customLang);
-  } catch(e) { error.textContent = 'Something went wrong. Please try again.'; }
-  finally { btn.textContent = '→'; btn.classList.remove('loading'); }
-}
-
 function showOnboarding(lang) {
   const data = ONBOARDING[lang.code] || ONBOARDING.en;
   const itemsEl = document.getElementById('onboardingItems');
@@ -703,6 +671,8 @@ function applyLang(lang) {
   document.getElementById('langBadgeFlag').textContent = lang.flag;
   document.getElementById('langBadgeName').textContent = lang.name;
   document.getElementById('submitBtn').textContent = lang.translateBtn || 'Translate';
+  document.getElementById('dictNote').textContent = NOTICE[lang.code] || NOTICE.en;
+  updateTranslateBtn();
 }
 function showLangPicker() {
   document.getElementById('langOverlay').style.display = 'flex';
@@ -913,6 +883,7 @@ function updateDisplay() {
     else { charEl.textContent = '?'; charEl.style.color = ''; tile.classList.remove('filled'); }
     tile.classList.toggle('active', i === activeSyl);
   });
+  updateTranslateBtn();
 }
 
 function syncButtonStates() {
@@ -984,35 +955,48 @@ function updateBatchimResetBtn() {
 const TRANSLATION_LABELS = { en:'Translation', zh:'翻译', ja:'翻訳', es:'Traducción', fr:'Traduction', ru:'Перевод', pt:'Tradução', ar:'ترجمة', hi:'अनुवाद', it:'Traduzione' };
 const LANG_NAMES = { en:'English', zh:'Chinese (Simplified)', ja:'Japanese', es:'Spanish', fr:'French', ru:'Russian', pt:'Portuguese', ar:'Arabic', hi:'Hindi', it:'Italian' };
 
-async function translateWord(text) {
-  const L = currentLang || LANGS[0];
-  const targetLang = LANG_NAMES[L.code] || 'English';
-  const display = document.getElementById('translationText');
-  const loading = document.getElementById('translationLoading');
-  display.textContent = '';
-  loading.style.display = 'inline';
-  try {
-    const res = await fetch('/api/translate', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, targetLang })
-    });
-    const data = await res.json();
-    if (data.error) { display.textContent = '⚠️ ' + (data.error || 'Error'); return; }
-    display.textContent = data.result || '—';
-  } catch(e) { display.textContent = '⚠️ Network error'; }
-  finally { loading.style.display = 'none'; }
-}
+// ── Offline dictionary lookup (no API) ──
+const DICT = window.DICT || {};
+const NOTICE = {
+  en: "Dictionary covers 10 languages & common vocabulary only.",
+  zh: "词典仅涵盖10种语言和常用词汇。",
+  ja: "辞書は10言語・常用語のみ対応しています。",
+  es: "El diccionario cubre solo 10 idiomas y vocabulario común.",
+  fr: "Le dictionnaire couvre 10 langues et le vocabulaire courant.",
+  ru: "Словарь охватывает 10 языков и общую лексику.",
+  pt: "O dicionário cobre apenas 10 idiomas e vocabulário comum.",
+  ar: "يغطي القاموس 10 لغات والمفردات الشائعة فقط.",
+  hi: "शब्दकोश केवल 10 भाषाएँ और सामान्य शब्द कवर करता है।",
+  it: "Il dizionario copre solo 10 lingue e vocabolario comune."
+};
+
 function currentWord() { return syl.map(compose).filter(Boolean).join(''); }
-function triggerTranslation() {
-  const text = currentWord();
-  if (!text) {
-    document.getElementById('translationText').textContent = '';
-    document.getElementById('translationLoading').style.display = 'none';
-    return;
-  }
-  translateWord(text);
+
+function lookupMeaning(word) {
+  const L = currentLang || LANGS[0];
+  const e = DICT[word];
+  if (!e) return null;
+  return e[L.code] || e.en || null;
 }
-function scheduleTranslation() { /* manual via Submit */ }
+
+// Translate button is enabled only when the current word exists in the dictionary
+function updateTranslateBtn() {
+  const word = currentWord();
+  const has = !!(word && DICT[word]);
+  const btn = document.getElementById('submitBtn');
+  if (btn) { btn.disabled = !has; btn.classList.toggle('disabled', !has); }
+  const t = document.getElementById('translationText');
+  if (t) t.textContent = '';
+}
+
+function triggerTranslation() {
+  const word = currentWord();
+  const display = document.getElementById('translationText');
+  if (!word || !DICT[word]) { display.textContent = ''; return; }
+  display.textContent = lookupMeaning(word) || '';
+}
+
+function scheduleTranslation() { updateTranslateBtn(); }
 
 function handleSelect(type, index, btn) {
   playClick();
