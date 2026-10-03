@@ -797,6 +797,39 @@ function startAudioKeepalive() {
     gain.gain.value = 0; osc.connect(gain); gain.connect(_keepAliveCtx.destination); osc.start();
   } catch(e) {}
 }
+// ── Fidget "dial detent" click (synthesized — no audio file) ──
+let soundOn = true;
+function playClick() {
+  if (!soundOn) return;
+  try {
+    startAudioKeepalive();
+    const ctx = _keepAliveCtx;
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+    const t = ctx.currentTime;
+    // body: low detent "tock" with slight pitch variation
+    const o1 = ctx.createOscillator(), g1 = ctx.createGain();
+    const base = 300 + Math.random() * 80;
+    o1.type = 'triangle';
+    o1.frequency.setValueAtTime(base, t);
+    o1.frequency.exponentialRampToValueAtTime(base * 0.6, t + 0.03);
+    g1.gain.setValueAtTime(0.0001, t);
+    g1.gain.exponentialRampToValueAtTime(0.11, t + 0.003);
+    g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    o1.connect(g1); g1.connect(ctx.destination);
+    o1.start(t); o1.stop(t + 0.05);
+    // transient: crisp high tick on top
+    const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+    o2.type = 'square';
+    o2.frequency.setValueAtTime(1300, t);
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(0.05, t + 0.001);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.012);
+    o2.connect(g2); g2.connect(ctx.destination);
+    o2.start(t); o2.stop(t + 0.02);
+  } catch(e) {}
+}
+
 function initAudioOnce() {
   startAudioKeepalive();
   document.removeEventListener('pointerdown', initAudioOnce);
@@ -823,6 +856,7 @@ function updateCountPicker() {
 }
 function setSylCount(n) {
   if (n === sylCount) return;
+  playClick();
   if (n > sylCount) { for (let i = sylCount; i < n; i++) syl[i] = makeSyl(); }
   else { syl.length = n; if (activeSyl > n - 1) activeSyl = n - 1; }
   sylCount = n;
@@ -974,6 +1008,7 @@ function triggerTranslation() {
 function scheduleTranslation() { /* manual via Submit */ }
 
 function handleSelect(type, index, btn) {
+  playClick();
   btn.classList.add('pressed');
   setTimeout(() => btn.classList.remove('pressed'), 150);
   const s = syl[activeSyl];
