@@ -583,8 +583,41 @@ window.DICT = {
   "악어": {en:"crocodile", zh:"鳄鱼", ja:"ワニ", es:"cocodrilo", fr:"crocodile", ru:"крокодил", pt:"crocodilo", ar:"تمساح", hi:"मगरमच्छ", it:"coccodrillo"},
   "다람쥐": {en:"squirrel", zh:"松鼠", ja:"リス", es:"ardilla", fr:"écureuil", ru:"белка", pt:"esquilo", ar:"سنجاب", hi:"गिलहरी", it:"scoiattolo"},
   "달팽이": {en:"snail", zh:"蜗牛", ja:"かたつむり", es:"caracol", fr:"escargot", ru:"улитка", pt:"caracol", ar:"حلزون", hi:"घोंघा", it:"lumaca"},
-  "지렁이": {en:"earthworm", zh:"蚯蚓", ja:"ミミズ", es:"lombriz", fr:"ver de terre", ru:"дождевой червь", pt:"minhoca", ar:"دودة الأرض", hi:"केंचुआ", it:"lombrico"}
+  "지렁이": {en:"earthworm", zh:"蚯蚓", ja:"ミミズ", es:"lombriz", fr:"ver de terre", ru:"дождевой червь", pt:"minhoca", ar:"دودة الأرض", hi:"केंचुआ", it:"lombrico"},
+
+  // ── batch 5: common phrases & greetings (≤5 syllables) ──
+  "안녕하세요": {en:"hello", zh:"你好", ja:"こんにちは", es:"hola", fr:"bonjour", ru:"здравствуйте", pt:"olá", ar:"مرحبا", hi:"नमस्ते", it:"salve"},
+  "고마워요": {en:"thank you", zh:"谢谢", ja:"ありがとう", es:"gracias", fr:"merci", ru:"спасибо", pt:"obrigado", ar:"شكراً", hi:"धन्यवाद", it:"grazie"},
+  "고마워": {en:"thanks (casual)", zh:"谢啦", ja:"ありがと", es:"gracias", fr:"merci", ru:"спасибо", pt:"valeu", ar:"شكراً", hi:"शुक्रिया", it:"grazie"},
+  "감사합니다": {en:"thank you (formal)", zh:"谢谢", ja:"ありがとうございます", es:"muchas gracias", fr:"merci beaucoup", ru:"большое спасибо", pt:"muito obrigado", ar:"شكراً جزيلاً", hi:"बहुत धन्यवाद", it:"grazie mille"},
+  "미안해요": {en:"I'm sorry", zh:"对不起", ja:"ごめんなさい", es:"lo siento", fr:"désolé", ru:"извините", pt:"desculpe", ar:"آسف", hi:"माफ़ करें", it:"scusa"},
+  "미안해": {en:"sorry (casual)", zh:"对不起", ja:"ごめん", es:"perdón", fr:"pardon", ru:"прости", pt:"desculpa", ar:"آسف", hi:"माफ़ी", it:"scusa"},
+  "죄송합니다": {en:"I'm sorry (formal)", zh:"非常抱歉", ja:"申し訳ありません", es:"lo siento mucho", fr:"je suis désolé", ru:"прошу прощения", pt:"sinto muito", ar:"أعتذر", hi:"क्षमा करें", it:"mi dispiace"},
+  "사랑해요": {en:"I love you", zh:"我爱你", ja:"愛してます", es:"te amo", fr:"je t'aime", ru:"я тебя люблю", pt:"eu te amo", ar:"أحبك", hi:"मैं तुमसे प्यार करता हूँ", it:"ti amo"},
+  "사랑해": {en:"I love you (casual)", zh:"我爱你", ja:"愛してる", es:"te amo", fr:"je t'aime", ru:"люблю тебя", pt:"te amo", ar:"أحبك", hi:"आई लव यू", it:"ti amo"},
+  "잘자요": {en:"good night", zh:"晚安", ja:"おやすみなさい", es:"buenas noches", fr:"bonne nuit", ru:"спокойной ночи", pt:"boa noite", ar:"تصبح على خير", hi:"शुभ रात्रि", it:"buonanotte"},
+  "잘자": {en:"good night (casual)", zh:"晚安", ja:"おやすみ", es:"buenas noches", fr:"bonne nuit", ru:"споки", pt:"boa noite", ar:"ليلة سعيدة", hi:"गुड नाइट", it:"notte"},
+  "잘가요": {en:"goodbye", zh:"再见", ja:"さようなら", es:"adiós", fr:"au revoir", ru:"пока", pt:"tchau", ar:"مع السلامة", hi:"अलविदा", it:"arrivederci"},
+  "여보세요": {en:"hello (on phone)", zh:"喂", ja:"もしもし", es:"¿aló?", fr:"allô", ru:"алло", pt:"alô", ar:"ألو", hi:"हैलो", it:"pronto"},
+  "어서오세요": {en:"welcome", zh:"欢迎光临", ja:"いらっしゃいませ", es:"bienvenido", fr:"bienvenue", ru:"добро пожаловать", pt:"bem-vindo", ar:"أهلاً وسهلاً", hi:"स्वागत है", it:"benvenuto"},
+  "반가워요": {en:"nice to meet you", zh:"很高兴见到你", ja:"はじめまして", es:"mucho gusto", fr:"enchanté", ru:"приятно познакомиться", pt:"prazer", ar:"سررت بلقائك", hi:"आपसे मिलकर खुशी हुई", it:"piacere"},
+  "괜찮아요": {en:"it's okay / I'm fine", zh:"没关系", ja:"大丈夫です", es:"está bien", fr:"ça va", ru:"всё хорошо", pt:"tudo bem", ar:"لا بأس", hi:"ठीक है", it:"va bene"},
+  "괜찮아": {en:"it's okay (casual)", zh:"没事", ja:"大丈夫", es:"está bien", fr:"ça va", ru:"нормально", pt:"tudo bem", ar:"لا بأس", hi:"ठीक है", it:"va bene"},
+  "맛있어요": {en:"it's delicious", zh:"很好吃", ja:"おいしいです", es:"está rico", fr:"c'est délicieux", ru:"вкусно", pt:"está delicioso", ar:"إنه لذيذ", hi:"स्वादिष्ट है", it:"è buono"},
+  "재미있어요": {en:"it's fun", zh:"很有趣", ja:"面白いです", es:"es divertido", fr:"c'est amusant", ru:"это интересно", pt:"é divertido", ar:"إنه ممتع", hi:"यह मज़ेदार है", it:"è divertente"},
+  "축하해요": {en:"congratulations", zh:"恭喜", ja:"おめでとう", es:"felicidades", fr:"félicitations", ru:"поздравляю", pt:"parabéns", ar:"مبروك", hi:"बधाई हो", it:"congratulazioni"},
+  "파이팅": {en:"you can do it! (cheer)", zh:"加油", ja:"ファイト", es:"¡ánimo!", fr:"courage !", ru:"давай!", pt:"força!", ar:"هيا!", hi:"शाबाश!", it:"forza!"},
+  "좋아요": {en:"good / I like it", zh:"好", ja:"いいですね", es:"me gusta", fr:"j'aime", ru:"нравится", pt:"gostei", ar:"جيد", hi:"अच्छा है", it:"mi piace"},
+  "싫어요": {en:"I don't like it", zh:"不喜欢", ja:"嫌です", es:"no me gusta", fr:"je n'aime pas", ru:"не нравится", pt:"não gosto", ar:"لا يعجبني", hi:"मुझे पसंद नहीं", it:"non mi piace"},
+  "몰라요": {en:"I don't know", zh:"我不知道", ja:"わかりません", es:"no sé", fr:"je ne sais pas", ru:"не знаю", pt:"não sei", ar:"لا أعرف", hi:"मुझे नहीं पता", it:"non lo so"},
+  "알아요": {en:"I know", zh:"我知道", ja:"知ってます", es:"lo sé", fr:"je sais", ru:"я знаю", pt:"eu sei", ar:"أعرف", hi:"मुझे पता है", it:"lo so"},
+  "보고싶어요": {en:"I miss you", zh:"我想你", ja:"会いたい", es:"te extraño", fr:"tu me manques", ru:"скучаю по тебе", pt:"sinto sua falta", ar:"اشتقت إليك", hi:"तुम्हारी याद आती है", it:"mi manchi"},
+  "배고파요": {en:"I'm hungry", zh:"我饿了", ja:"お腹すいた", es:"tengo hambre", fr:"j'ai faim", ru:"я голоден", pt:"estou com fome", ar:"أنا جائع", hi:"मुझे भूख लगी है", it:"ho fame"},
+  "아파요": {en:"it hurts / I'm sick", zh:"我不舒服", ja:"痛いです", es:"me duele", fr:"j'ai mal", ru:"мне больно", pt:"dói", ar:"أتألم", hi:"दर्द हो रहा है", it:"mi fa male"},
+  "조심하세요": {en:"be careful", zh:"小心", ja:"気をつけて", es:"ten cuidado", fr:"fais attention", ru:"будьте осторожны", pt:"cuidado", ar:"انتبه", hi:"सावधान रहें", it:"attento"},
+  "안돼요": {en:"no / not allowed", zh:"不行", ja:"だめです", es:"no se puede", fr:"ce n'est pas possible", ru:"нельзя", pt:"não pode", ar:"لا يجوز", hi:"नहीं चलेगा", it:"non si può"}
 };
+
 
 
 
