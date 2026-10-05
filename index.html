@@ -1136,23 +1136,15 @@ function speak() {
     window.speechSynthesis.cancel();
     setTimeout(() => {
       const koVoice = _getBestKoVoice();
-      const syllables = [...text];
-      let idx = 0;
-      function makeU(t) {
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = 'ko-KR'; u.rate = 0.7; u.pitch = 1.0; u.volume = 1.0;
-        if (koVoice) u.voice = koVoice;
-        return u;
-      }
-      function speakNext() {
-        if (idx >= syllables.length) { done(); return; }
-        const u = makeU(syllables[idx++]);
-        u.onend = () => { if (idx < syllables.length) setTimeout(speakNext, 10); else done(); };
-        u.onerror = (e) => { done(); };
-        window.speechSynthesis.speak(u);
-      }
-      if (_keepAliveCtx && _keepAliveCtx.state === 'suspended') _keepAliveCtx.resume().then(speakNext).catch(speakNext);
-      else speakNext();
+      // Speak the whole word as one natural utterance (not syllable-by-syllable)
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ko-KR'; u.rate = 0.95; u.pitch = 1.0; u.volume = 1.0;
+      if (koVoice) u.voice = koVoice;
+      u.onend = () => { done(); };
+      u.onerror = () => { done(); };
+      const go = () => window.speechSynthesis.speak(u);
+      if (_keepAliveCtx && _keepAliveCtx.state === 'suspended') _keepAliveCtx.resume().then(go).catch(go);
+      else go();
     }, 50);
   };
   if (!_voicesReady) setTimeout(() => { _loadVoices(); _speak(); }, 300);
