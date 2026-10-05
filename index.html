@@ -1138,7 +1138,7 @@ function speak() {
       const koVoice = _getBestKoVoice();
       // Speak the whole word as one natural utterance (not syllable-by-syllable)
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ko-KR'; u.rate = 0.95; u.pitch = 1.0; u.volume = 1.0;
+      u.lang = 'ko-KR'; u.rate = 0.82; u.pitch = 1.0; u.volume = 1.0;
       if (koVoice) u.voice = koVoice;
       u.onend = () => { done(); };
       u.onerror = () => { done(); };
